@@ -152,3 +152,256 @@ async def metrics():
                 "memory_pct":round(mem,1) if mem is not None else None,"configured":True}
     except Exception:
         return {"cpu_pct":None,"memory_pct":None,"configured":True,"error":"Prometheus query failed"}
+
+# Read-only Kubernetes management views. These endpoints never mutate cluster state.
+def _all_namespaces(v1):
+    return [n.metadata.name for n in v1.list_namespace().items
+            if n.metadata.name not in settings.excluded_namespaces]
+
+@router.get("/namespaces")
+def namespaces():
+    v1, _ = core()
+    try:
+        return [{"name": n.metadata.name, "phase": getattr(n.status, "phase", "Unknown")}
+                for n in v1.list_namespace().items
+                if n.metadata.name not in settings.excluded_namespaces]
+    except ApiException as e:
+        raise HTTPException(status_code=502, detail=f"Kubernetes API error: {e.reason}")
+
+@router.get("/topology")
+def topology(namespace: str | None = None):
+    v1, apps = core()
+    try:
+        ns_items = [n for n in v1.list_namespace().items if n.metadata.name not in settings.excluded_namespaces]
+        if namespace:
+            ns_items = [n for n in ns_items if n.metadata.name == namespace]
+        pods = [p for p in (v1.list_namespaced_pod(namespace).items if namespace else v1.list_pod_for_all_namespaces().items)
+                if p.metadata.namespace not in settings.excluded_namespaces]
+        services = [s for s in (v1.list_namespaced_service(namespace).items if namespace else v1.list_service_for_all_namespaces().items)
+                    if s.metadata.namespace not in settings.excluded_namespaces]
+        deps = [d for d in (apps.list_namespaced_deployment(namespace).items if namespace else apps.list_deployment_for_all_namespaces().items)
+                if d.metadata.namespace not in settings.excluded_namespaces]
+        pvcs = [p for p in (v1.list_namespaced_persistent_volume_claim(namespace).items if namespace else v1.list_persistent_volume_claim_for_all_namespaces().items)
+                if p.metadata.namespace not in settings.excluded_namespaces]
+        ing_api = client.NetworkingV1Api()
+        ingresses = [i for i in (ing_api.list_namespaced_ingress(namespace).items if namespace else ing_api.list_ingress_for_all_namespaces().items)
+                     if i.metadata.namespace not in settings.excluded_namespaces]
+    except ApiException as e:
+        raise HTTPException(status_code=502, detail=f"Topology inventory unavailable: {e.reason}")
+    groups = {}
+    for n in ns_items:
+        groups[n.metadata.name] = {"namespace": n.metadata.name, "pods": 0, "services": 0,
+                                   "deployments": 0, "pvcs": 0, "ingresses": 0, "resources": 0}
+    for key, items in [("pods", pods), ("services", services), ("deployments", deps), ("pvcs", pvcs), ("ingresses", ingresses)]:
+        for item in items:
+            ns = item.metadata.namespace
+            if ns in groups: groups[ns][key] += 1
+    for g in groups.values(): g["resources"] = sum(g[k] for k in ("pods", "services", "deployments", "pvcs", "ingresses"))
+    edges = []
+    pod_by_ns = {}
+    for p in pods: pod_by_ns.setdefault(p.metadata.namespace, []).append(p)
+    for svc in services:
+        selector = svc.spec.selector or {}
+        if not selector: continue
+        matched = [p for p in pod_by_ns.get(svc.metadata.namespace, [])
+                   if all((p.metadata.labels or {}).get(k) == v for k, v in selector.items())]
+        for p in matched[:50]:
+            edges.append({"namespace": svc.metadata.namespace, "from": "Service/"+svc.metadata.name,
+                          "to": "Pod/"+p.metadata.name, "type": "selects"})
+    for ing in ingresses:
+        for rule in (ing.spec.rules or []) if ing.spec else []:
+            for path in (rule.http.paths or []) if rule.http else []:
+                svc_name = path.backend.service.name if path.backend and path.backend.service else None
+                if svc_name:
+                    edges.append({"namespace": ing.metadata.namespace, "from": "Ingress/"+ing.metadata.name,
+                                  "to": "Service/"+svc_name, "type": "routes to"})
+    pvc_names = {p.metadata.namespace + "/" + p.metadata.name for p in pvcs}
+    for pod in pods:
+        for volume in (pod.spec.volumes or []) if pod.spec else []:
+            claim = volume.persistent_volume_claim.claim_name if volume.persistent_volume_claim else None
+            if claim and pod.metadata.namespace + "/" + claim in pvc_names:
+                edges.append({"namespace": pod.metadata.namespace, "from": "Pod/"+pod.metadata.name,
+                              "to": "PVC/"+claim, "type": "mounts"})
+    return {"namespaces": list(groups.values()), "edges": edges,
+            "totals": {k: sum(g[k] for g in groups.values()) for k in ("pods", "services", "deployments", "pvcs", "ingresses", "resources")}}
+
+@router.get("/applications")
+def applications(namespace: str | None = None):
+    v1, apps = core()
+    try:
+        ds = apps.list_namespaced_deployment(namespace).items if namespace else apps.list_deployment_for_all_namespaces().items
+        sts = apps.list_namespaced_stateful_set(namespace).items if namespace else apps.list_stateful_set_for_all_namespaces().items
+        pods = v1.list_namespaced_pod(namespace).items if namespace else v1.list_pod_for_all_namespaces().items
+    except ApiException as e:
+        raise HTTPException(status_code=502, detail=f"Application inventory unavailable: {e.reason}")
+    grouped = {}
+    for w in list(ds) + list(sts):
+        ns = w.metadata.namespace
+        if ns in settings.excluded_namespaces: continue
+        labels = w.metadata.labels or {}
+        app_name = labels.get("app.kubernetes.io/name") or labels.get("app") or w.metadata.name
+        key = ns + "/" + app_name
+        item = grouped.setdefault(key, {"namespace": ns, "name": app_name, "workloads": [], "desired": 0, "ready": 0, "pods": 0})
+        desired = w.spec.replicas or 0
+        ready = w.status.ready_replicas or 0
+        item["workloads"].append({"kind": "Deployment" if w in ds else "StatefulSet", "name": w.metadata.name, "desired": desired, "ready": ready})
+        item["desired"] += desired; item["ready"] += ready
+    for p in pods:
+        ns = p.metadata.namespace
+        if ns in settings.excluded_namespaces: continue
+        labels = p.metadata.labels or {}
+        app_name = labels.get("app.kubernetes.io/name") or labels.get("app")
+        if app_name and ns + "/" + app_name in grouped: grouped[ns + "/" + app_name]["pods"] += 1
+    return sorted(grouped.values(), key=lambda x: (x["namespace"], x["name"]))
+
+@router.get("/timeline")
+def timeline(namespace: str | None = None, limit: int = 200):
+    v1, _ = core()
+    try:
+        items = v1.list_namespaced_event(namespace).items if namespace else v1.list_event_for_all_namespaces().items
+    except ApiException as e:
+        raise HTTPException(status_code=502, detail=f"Event timeline unavailable: {e.reason}")
+    out = []
+    for e in items:
+        ns = e.metadata.namespace or ""
+        if ns in settings.excluded_namespaces: continue
+        when = e.last_timestamp or e.event_time or e.first_timestamp or e.metadata.creation_timestamp
+        out.append({"time": when.isoformat() if when else None, "namespace": ns,
+                    "type": e.type or "Normal", "reason": e.reason or "Event",
+                    "object": f"{e.involved_object.kind or 'Resource'}/{e.involved_object.name or ''}",
+                    "message": e.message or "", "count": e.count or 1})
+    out.sort(key=lambda x: x["time"] or "", reverse=True)
+    return out[:min(max(limit, 1), 500)]
+
+@router.get("/checks")
+def checks():
+    v1, apps = core()
+    results = []
+    try:
+        nodes = v1.list_node().items
+        pods = [p for p in v1.list_pod_for_all_namespaces().items if p.metadata.namespace not in settings.excluded_namespaces]
+        deps = [d for d in apps.list_deployment_for_all_namespaces().items if d.metadata.namespace not in settings.excluded_namespaces]
+    except ApiException as e:
+        raise HTTPException(status_code=502, detail=f"Health checks unavailable: {e.reason}")
+    for n in nodes:
+        for c in n.status.conditions or []:
+            if c.type == "Ready" or (c.type in ("MemoryPressure", "DiskPressure", "PIDPressure") and c.status == "True"):
+                if c.status == "Unknown":
+                    check_status = "WARN"
+                elif c.type == "Ready":
+                    check_status = "PASS" if c.status == "True" else "FAIL"
+                else:
+                    check_status = "FAIL" if c.status == "True" else "PASS"
+                results.append({"status": check_status, "scope": "Node", "resource": n.metadata.name,
+                                "check": c.type, "message": c.message or c.reason or c.status})
+    for p in pods:
+        phase = p.status.phase or "Unknown"
+        if phase != "Running":
+            results.append({"status": "FAIL" if phase == "Failed" else "WARN", "scope": "Pod",
+                            "resource": p.metadata.namespace + "/" + p.metadata.name,
+                            "check": "Pod phase", "message": phase})
+        for c in p.status.container_statuses or []:
+            state = c.state.waiting if c.state else None
+            if state and state.reason:
+                results.append({"status": "FAIL" if state.reason in ("CrashLoopBackOff", "ImagePullBackOff", "ErrImagePull") else "WARN",
+                                "scope": "Container", "resource": p.metadata.namespace + "/" + p.metadata.name + "/" + c.name,
+                                "check": state.reason, "message": state.message or state.reason})
+    for d in deps:
+        desired = d.spec.replicas or 0; ready = d.status.ready_replicas or 0
+        if ready < desired:
+            results.append({"status": "WARN", "scope": "Deployment", "resource": d.metadata.namespace + "/" + d.metadata.name,
+                            "check": "Replica availability", "message": f"{ready}/{desired} replicas ready"})
+    results.sort(key=lambda x: (x["status"] != "FAIL", x["status"] != "WARN", x["scope"], x["resource"]))
+    return {"summary": {s: sum(x["status"] == s for x in results) for s in ("PASS", "WARN", "FAIL")}, "checks": results}
+
+@router.get("/capacity")
+def capacity():
+    v1, _ = core()
+    from kubernetes.utils.quantity import parse_quantity
+    def q(value):
+        try: return float(parse_quantity(value or "0"))
+        except Exception: return 0.0
+    try:
+        nodes = v1.list_node().items
+        pods = [p for p in v1.list_pod_for_all_namespaces().items if p.metadata.namespace not in settings.excluded_namespaces]
+    except ApiException as e:
+        raise HTTPException(status_code=502, detail=f"Capacity data unavailable: {e.reason}")
+    cpu_cap=mem_cap=cpu_req=mem_req=0.0
+    for n in nodes:
+        alloc=n.status.allocatable or {}
+        cpu_cap += q(alloc.get("cpu")) * 1000
+        mem_cap += q(alloc.get("memory"))
+    for p in pods:
+        for c in p.spec.containers or []:
+            req=(c.resources.requests or {}) if c.resources else {}
+            cpu_req += q(req.get("cpu")) * 1000
+            mem_req += q(req.get("memory"))
+    return {"nodes": len(nodes), "pods": len(pods), "cpu_millicores": {"requested": round(cpu_req), "allocatable": round(cpu_cap), "pct": round(cpu_req/cpu_cap*100,1) if cpu_cap else None},
+            "memory_bytes": {"requested": round(mem_req), "allocatable": round(mem_cap), "pct": round(mem_req/mem_cap*100,1) if mem_cap else None},
+            "note": "Requests are summed from container resource requests; limits and live usage are separate measures."}
+
+@router.get("/cost")
+def cost():
+    data = capacity()
+    return {"pricing_configured": False, "currency": None, "estimated_cost": None,
+            "cpu_requested_millicores": data["cpu_millicores"]["requested"],
+            "memory_requested_bytes": data["memory_bytes"]["requested"],
+            "note": "No cloud/on-prem pricing model is configured. Showing resource consumption only; no monetary cost is fabricated."}
+
+@router.get("/traffic")
+async def traffic():
+    if not settings.prometheus_url:
+        return {"configured": False, "series": [], "note": "Configure PROMETHEUS_URL and suitable network metrics to enable traffic rates."}
+    queries = {
+        "receive_bytes_per_second": 'sum by (namespace,pod) (rate(container_network_receive_bytes_total{pod!=""}[5m]))',
+        "transmit_bytes_per_second": 'sum by (namespace,pod) (rate(container_network_transmit_bytes_total{pod!=""}[5m]))'
+    }
+    try:
+        async with httpx.AsyncClient(timeout=10) as c:
+            out = {}
+            for key, expr in queries.items():
+                r = await c.get(settings.prometheus_url.rstrip("/")+"/api/v1/query", params={"query":expr}); r.raise_for_status()
+                out[key] = [{"metric": x.get("metric", {}), "value": float(x["value"][1])} for x in r.json().get("data",{}).get("result",[])]
+        return {"configured": True, **out}
+    except Exception:
+        return {"configured": True, "series": [], "error": "Prometheus network metrics are unavailable or not enabled."}
+
+@router.get("/helm")
+def helm_releases():
+    # Helm v3 stores release metadata in Secrets; deliberately do not request Secret access.
+    # HelmRelease CRs from Flux are surfaced when installed.
+    try:
+        custom = client.CustomObjectsApi()
+        items = custom.list_cluster_custom_object("helm.toolkit.fluxcd.io", "v2", "helmreleases").get("items", [])
+        return {"source": "Flux HelmRelease", "available": True, "items": [
+            {"namespace": x.get("metadata",{}).get("namespace"), "name": x.get("metadata",{}).get("name"),
+             "chart": x.get("spec",{}).get("chart",{}).get("spec",{}).get("chart"),
+             "version": x.get("spec",{}).get("chart",{}).get("spec",{}).get("version"),
+             "ready": any(c.get("type") == "Ready" and c.get("status") == "True" for c in x.get("status",{}).get("conditions",[]))}
+            for x in items]}
+    except Exception:
+        return {"source": "Flux HelmRelease", "available": False, "items": [],
+                "note": "No readable Flux HelmRelease CRD found. Native Helm release Secrets are intentionally not accessed."}
+
+@router.get("/gitops")
+def gitops():
+    custom = client.CustomObjectsApi()
+    resources = [("argoproj.io", "v1alpha1", "applications", "Argo CD Application"),
+                 ("source.toolkit.fluxcd.io", "v1", "gitrepositories", "Flux GitRepository"),
+                 ("kustomize.toolkit.fluxcd.io", "v1", "kustomizations", "Flux Kustomization"),
+                 ("helm.toolkit.fluxcd.io", "v2", "helmreleases", "Flux HelmRelease")]
+    out=[]; found=False
+    for group, version, plural, label in resources:
+        try:
+            data=custom.list_cluster_custom_object(group,version,plural)
+            found=True
+            for x in data.get("items",[]):
+                meta=x.get("metadata",{}); status=x.get("status",{}); conditions=status.get("conditions",[])
+                ready=next((c for c in conditions if c.get("type")=="Ready"),None)
+                out.append({"provider":label,"namespace":meta.get("namespace","default"),"name":meta.get("name"),
+                            "ready":ready.get("status")=="True" if ready else None,
+                            "reason":ready.get("reason") if ready else "Status unavailable",
+                            "message":ready.get("message") if ready else "", "revision":status.get("lastAppliedRevision") or status.get("lastAttemptedRevision") or status.get("sync" ,{}).get("revision")})
+        except Exception:
+            continue
+    return {"available":found,"items":out,"note":None if found else "No supported Argo CD or Flux resources found, or the CRD is not readable."}
