@@ -49,3 +49,20 @@ def incident_detail(incident_id: str, db: Session = Depends(get_db)):
     if not item:
         raise HTTPException(status_code=404, detail="Incident not found")
     return item
+
+@app.post("/incidents/{incident_id}/close", response_model=IncidentOut)
+def close_incident(incident_id: str, db: Session = Depends(get_db)):
+    item = db.get(Incident, incident_id)
+
+    if not item:
+        raise HTTPException(status_code=404, detail="Incident not found")
+
+    if item.status == "CLOSED":
+        return item
+
+    item.status = "CLOSED"
+    db.commit()
+    db.refresh(item)
+
+    logging.info("Incident %s closed by operator", incident_id)
+    return item
