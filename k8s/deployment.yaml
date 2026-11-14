@@ -1,0 +1,54 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: k8s-ai-rca-agent
+  namespace: observability
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: k8s-ai-rca-agent
+  template:
+    metadata:
+      labels:
+        app: k8s-ai-rca-agent
+      annotations:
+        clusterpulse.io/image-revision: "initial"
+    spec:
+      serviceAccountName: k8s-ai-rca-agent
+      containers:
+      - name: agent
+        image: "ghcr.io/your-github-owner/your-repository:latest"
+        imagePullPolicy: Always
+        ports:
+        - name: http
+          containerPort: 8080
+        envFrom:
+        - configMapRef:
+            name: k8s-ai-rca-config
+        - secretRef:
+            name: k8s-ai-rca-secrets
+        readinessProbe:
+          httpGet: {path: /readyz, port: http}
+          initialDelaySeconds: 10
+          periodSeconds: 10
+        livenessProbe:
+          httpGet: {path: /healthz, port: http}
+          initialDelaySeconds: 20
+          periodSeconds: 20
+        resources:
+          requests: {cpu: 100m, memory: 256Mi}
+          limits: {cpu: "1", memory: 1Gi}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: k8s-ai-rca-agent
+  namespace: observability
+spec:
+  selector:
+    app: k8s-ai-rca-agent
+  ports:
+  - name: http
+    port: 8080
+    targetPort: http
