@@ -213,6 +213,12 @@ body{background:radial-gradient(ellipse at 12% 8%,rgba(15,104,130,.22),transpare
 }
 \n
 .drawer-actions{display:flex;justify-content:flex-end;margin:12px 0 18px}.danger-btn{border-color:#8b3d4b!important;color:#ff9aaa!important;background:#351923!important}
+
+.drawer-status-toolbar{display:flex;align-items:center;gap:9px;flex-wrap:wrap;width:100%;margin:0 0 18px}
+.drawer-action-spacer{flex:1 1 auto;min-width:12px}
+.drawer-close-action{margin-left:auto;white-space:nowrap;min-height:36px;padding:8px 14px!important;font-size:12px!important;line-height:1.2;border-radius:10px!important;display:inline-flex;align-items:center;justify-content:center}
+.drawer-closed-note{margin-left:auto;white-space:nowrap;padding:7px 10px;border-radius:9px;background:rgba(86,223,176,.10);color:#56dfb0}
+@media(max-width:560px){.drawer-action-spacer{display:none}.drawer-close-action,.drawer-closed-note{margin-left:0}}
 </style></head>
 <body>
 <aside class="glass-sidebar">
@@ -353,15 +359,16 @@ function filterIncidents(sev){
 }
 function renderIncidents(){
  const f=$('incident-filter').value;
- const a=f?incidentData.filter(x=>x.severity===f):incidentData;
- $('incident-total').textContent=a.length+' incidents shown';
- $('incidentrows').innerHTML=a.length?a.slice(0,50).map(x=>`<tr class="incident-row" onclick="openIncident('${esc(x.id)}')"><td><span class="sev ${esc(x.severity)}">${esc(x.severity)}</span></td><td>${esc(x.namespace)}</td><td>${esc(x.pod_name||'Cluster resource')}</td><td>${esc(x.summary||'')}</td><td>${badge(x.status!=='OPEN',x.status,x.status)}</td><td>${x.occurrences||1}</td></tr>`).join(''):'<tr><td colspan="6" class="empty">No incidents in this severity</td></tr>';
+ const openIncidents=incidentData.filter(x=>x.status==='OPEN');
+ const a=f?openIncidents.filter(x=>x.severity===f):openIncidents;
+ $('incident-total').textContent=a.length+' open incidents shown';
+ $('incidentrows').innerHTML=a.length?a.slice(0,50).map(x=>`<tr class="incident-row" onclick="openIncident('${esc(x.id)}')"><td><span class="sev ${esc(x.severity)}">${esc(x.severity)}</span></td><td>${esc(x.namespace)}</td><td>${esc(x.pod_name||'Cluster resource')}</td><td>${esc(x.summary||'')}</td><td>${badge(false,x.status,x.status)}</td><td>${x.occurrences||1}</td></tr>`).join(''):'<tr><td colspan="6" class="empty">No open incidents in this severity</td></tr>';
 }
 async function loadIncidents(){
  const a=await api('/incidents?limit=100');incidentData=a;
  const open=a.filter(x=>x.status==='OPEN');
  $('incidents').textContent=open.length;$('incsub').textContent=a.length+' recorded incidents';
- for(const sev of ['CRITICAL','HIGH','MEDIUM','LOW'])$( 'sev-'+sev.toLowerCase()).textContent=a.filter(x=>x.severity===sev).length;
+ for(const sev of ['CRITICAL','HIGH','MEDIUM','LOW'])$( 'sev-'+sev.toLowerCase()).textContent=open.filter(x=>x.severity===sev).length;
  renderIncidents();
 }
 function rcaSection(title,content){
@@ -388,11 +395,10 @@ async function openIncident(id){
     rcaStatus==='PROCESSING'?'AI analysis is currently running.':
     'AI analysis is pending or unavailable.');
   const closeAction=x.status==='OPEN'
-    ? `<div class="drawer-actions"><button class="smallbtn danger-btn" onclick="closeIncidentRecord('${esc(x.id)}')">Close incident</button></div>`
-    : '<div class="drawer-actions"><span class="visual-note">This incident is closed.</span></div>';
+    ? `<button class="smallbtn danger-btn drawer-close-action" onclick="closeIncidentRecord('${esc(x.id)}')">Close incident</button>`
+    : '<span class="visual-note drawer-closed-note">This incident is closed.</span>';
   $('drawer-content').innerHTML=
-   `<div class="toolbar"><span class="sev ${esc(x.severity)}">${esc(x.severity)}</span>${badge(x.status!=='OPEN',x.status,x.status)}${badge(x.email_status==='SENT','Email sent',x.email_status||'Email pending')}${badge(rcaStatus==='COMPLETED',rcaStatus,rcaStatus)}</div>
-   ${closeAction}
+   `<div class="toolbar drawer-status-toolbar"><span class="sev ${esc(x.severity)}">${esc(x.severity)}</span>${badge(x.status!=='OPEN',x.status,x.status)}${badge(x.email_status==='SENT','Email sent',x.email_status||'Email pending')}${badge(rcaStatus==='COMPLETED',rcaStatus,rcaStatus)}<span class="drawer-action-spacer"></span>${closeAction}</div>
    ${rcaSection('RCA PROCESSING DETAILS',rcaProgress)}
    ${rcaSection('INCIDENT SUMMARY','<p>'+esc(r.incident_summary||x.summary||'')+'</p>')}
    ${rcaSection('ROOT CAUSE · '+esc(r.confidence||'Confidence pending'),'<p>'+esc(rootCauseText)+'</p>')}
@@ -592,7 +598,8 @@ function renderRcaDashboard(){
  $('rca-emailed').textContent=a.filter(x=>x.email_status==='SENT').length;
  $('rca-open').textContent=a.filter(x=>x.status==='OPEN').length;
 
- $('rca-rows').innerHTML=a.length?a.slice(0,100).map(x=>{
+ const openIncidents=a.filter(x=>x.status==='OPEN');
+ $('rca-rows').innerHTML=openIncidents.length?openIncidents.slice(0,100).map(x=>{
    const r=x.rca||{};
    const st=status(x);
    const labels={
@@ -621,7 +628,7 @@ function renderRcaDashboard(){
      <td>${esc(x.email_status||'Pending')}</td>
      <td><button class="smallbtn" onclick="event.stopPropagation();openIncident('${esc(x.id)}')">View RCA</button></td>
    </tr>`;
- }).join(''):'<tr><td colspan="7" class="empty">No investigation records</td></tr>';
+ }).join(''):'<tr><td colspan="7" class="empty">No open investigations</td></tr>';
 
  const coverage=a.length?Math.round(withRca.length/a.length*100)+'%':'—';
  $('rca-coverage').textContent=coverage;
