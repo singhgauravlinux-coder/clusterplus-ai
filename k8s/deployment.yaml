@@ -13,12 +13,12 @@ spec:
       labels:
         app: k8s-ai-rca-agent
       annotations:
-        clusterpulse.io/image-revision: "initial"
+        clusterpulse.io/image-revision: "a7e42d10fee77007abcc7035425aebf5dd663bb1"
     spec:
       serviceAccountName: k8s-ai-rca-agent
       containers:
       - name: agent
-        image: "ghcr.io/your-github-owner/your-repository:latest"
+        image: "ghcr.io/singhgauravlinux-coder/clusterplus-ai:latest"
         imagePullPolicy: Always
         ports:
         - name: http
