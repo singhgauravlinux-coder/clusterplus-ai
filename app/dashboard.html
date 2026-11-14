@@ -211,7 +211,9 @@ body{background:radial-gradient(ellipse at 12% 8%,rgba(15,104,130,.22),transpare
  white-space: pre-wrap;
  overflow-wrap: anywhere;
 }
-\n</style></head>
+\n
+.drawer-actions{display:flex;justify-content:flex-end;margin:12px 0 18px}.danger-btn{border-color:#8b3d4b!important;color:#ff9aaa!important;background:#351923!important}
+</style></head>
 <body>
 <aside class="glass-sidebar">
  <div class="side-brand">✦ ClusterPulse <span class="cyan">AI</span></div>
@@ -385,8 +387,12 @@ async function openIncident(id){
     rcaStatus==='FAILED'?'RCA analysis failed. See processing details for the last error and retry schedule.':
     rcaStatus==='PROCESSING'?'AI analysis is currently running.':
     'AI analysis is pending or unavailable.');
+  const closeAction=x.status==='OPEN'
+    ? `<div class="drawer-actions"><button class="smallbtn danger-btn" onclick="closeIncidentRecord('${esc(x.id)}')">Close incident</button></div>`
+    : '<div class="drawer-actions"><span class="visual-note">This incident is closed.</span></div>';
   $('drawer-content').innerHTML=
    `<div class="toolbar"><span class="sev ${esc(x.severity)}">${esc(x.severity)}</span>${badge(x.status!=='OPEN',x.status,x.status)}${badge(x.email_status==='SENT','Email sent',x.email_status||'Email pending')}${badge(rcaStatus==='COMPLETED',rcaStatus,rcaStatus)}</div>
+   ${closeAction}
    ${rcaSection('RCA PROCESSING DETAILS',rcaProgress)}
    ${rcaSection('INCIDENT SUMMARY','<p>'+esc(r.incident_summary||x.summary||'')+'</p>')}
    ${rcaSection('ROOT CAUSE · '+esc(r.confidence||'Confidence pending'),'<p>'+esc(rootCauseText)+'</p>')}
@@ -401,6 +407,24 @@ async function openIncident(id){
  }catch(e){$('drawer-content').innerHTML='<p class="empty">Unable to load incident: '+esc(e.message)+'</p>'}
 }
 function closeIncident(){$('incident-drawer').classList.remove('open')}
+async function closeIncidentRecord(id){
+ if(!confirm('Close this incident? This changes its status to CLOSED.'))return;
+ try{
+  const response=await fetch('/incidents/'+encodeURIComponent(id)+'/close',{
+   method:'POST',headers:{'Accept':'application/json'}
+  });
+  if(!response.ok){
+   let detail='HTTP '+response.status;
+   try{const body=await response.json();if(body.detail)detail=body.detail}catch(_e){}
+   throw new Error(detail);
+  }
+  await loadIncidents();
+  renderRcaDashboard();
+  await openIncident(id);
+ }catch(error){
+  alert('Could not close incident: '+error.message);
+ }
+}
 function goTo(id){document.getElementById(id)?.scrollIntoView({behavior:'smooth',block:'start'})}
 
 
