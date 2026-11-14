@@ -4,7 +4,7 @@ from fastapi import FastAPI, Depends, HTTPException
 from sqlalchemy.orm import Session
 from app.db import init_db, SessionLocal, Incident
 from app.monitor import start_watchers
-from app.schemas import IncidentOut
+from app.schemas import IncidentOut, CloseIncidentRequest
 from fastapi.responses import HTMLResponse
 from pathlib import Path
 from app.dashboard_api import router as dashboard_router
@@ -51,7 +51,7 @@ def incident_detail(incident_id: str, db: Session = Depends(get_db)):
     return item
 
 @app.post("/incidents/{incident_id}/close", response_model=IncidentOut)
-def close_incident(incident_id: str, db: Session = Depends(get_db)):
+def close_incident(incident_id: str, payload: CloseIncidentRequest, db: Session = Depends(get_db)):
     item = db.get(Incident, incident_id)
 
     if not item:
@@ -60,7 +60,10 @@ def close_incident(incident_id: str, db: Session = Depends(get_db)):
     if item.status == "CLOSED":
         return item
 
+    from datetime import datetime, timezone
     item.status = "CLOSED"
+    item.closure_remark = payload.remark.strip()
+    item.closed_at = datetime.now(timezone.utc)
     db.commit()
     db.refresh(item)
 

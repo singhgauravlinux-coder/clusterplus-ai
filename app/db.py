@@ -26,6 +26,8 @@ class Incident(Base):
     rca_next_retry: Mapped[object | None] = mapped_column(DateTime(timezone=True), nullable=True)
     rca_last_error: Mapped[str | None] = mapped_column(Text, nullable=True)
     occurrences: Mapped[int] = mapped_column(Integer, default=1)
+    closure_remark: Mapped[str | None] = mapped_column(Text, nullable=True)
+    closed_at: Mapped[object | None] = mapped_column(DateTime(timezone=True), nullable=True)
     created_at: Mapped[object] = mapped_column(DateTime(timezone=True), server_default=func.now())
     updated_at: Mapped[object] = mapped_column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
 
@@ -37,6 +39,8 @@ def init_db():
         "rca_attempts": "INTEGER NOT NULL DEFAULT 0",
         "rca_next_retry": "TIMESTAMP WITH TIME ZONE NULL",
         "rca_last_error": "TEXT NULL",
+        "closure_remark": "TEXT NULL",
+        "closed_at": "TIMESTAMP WITH TIME ZONE NULL",
     }
 
     with engine.begin() as conn:

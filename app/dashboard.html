@@ -219,6 +219,14 @@ body{background:radial-gradient(ellipse at 12% 8%,rgba(15,104,130,.22),transpare
 .drawer-close-action{margin-left:auto;white-space:nowrap;min-height:36px;padding:8px 14px!important;font-size:12px!important;line-height:1.2;border-radius:10px!important;display:inline-flex;align-items:center;justify-content:center}
 .drawer-closed-note{margin-left:auto;white-space:nowrap;padding:7px 10px;border-radius:9px;background:rgba(86,223,176,.10);color:#56dfb0}
 @media(max-width:560px){.drawer-action-spacer{display:none}.drawer-close-action,.drawer-closed-note{margin-left:0}}
+
+
+.closure-form{border:1px solid rgba(255,113,133,.35);background:rgba(24,34,54,.88);border-radius:12px;padding:16px;margin:0 0 18px}
+.closure-form[hidden]{display:none}
+.closure-form label{display:block;font-weight:650;margin-bottom:8px;color:#dce8f8}
+.closure-form textarea{display:block;width:100%;box-sizing:border-box;resize:vertical;min-height:96px;padding:12px;border:1px solid #34465f;border-radius:9px;background:#0b1627;color:#e6eefb;font:inherit;line-height:1.45}
+.closure-form textarea:focus{outline:2px solid rgba(91,211,232,.55);outline-offset:1px}
+.closure-form-actions{display:flex;justify-content:flex-end;gap:9px;margin-top:12px;flex-wrap:wrap}
 </style></head>
 <body>
 <aside class="glass-sidebar">
@@ -395,10 +403,15 @@ async function openIncident(id){
     rcaStatus==='PROCESSING'?'AI analysis is currently running.':
     'AI analysis is pending or unavailable.');
   const closeAction=x.status==='OPEN'
-    ? `<button class="smallbtn danger-btn drawer-close-action" onclick="closeIncidentRecord('${esc(x.id)}')">Close incident</button>`
+    ? `<button class="smallbtn danger-btn drawer-close-action" onclick="showClosureForm('${esc(x.id)}')">Close incident</button>`
     : '<span class="visual-note drawer-closed-note">This incident is closed.</span>';
+  const closureSection=x.status==='CLOSED'
+    ? rcaSection('CLOSURE REMARK', '<p>'+esc(x.closure_remark||'No closure remark was recorded.')+'</p><p class="visual-note">Closed at: '+esc(x.closed_at?new Date(x.closed_at).toLocaleString():'Unknown')+'</p>')
+    : '';
   $('drawer-content').innerHTML=
    `<div class="toolbar drawer-status-toolbar"><span class="sev ${esc(x.severity)}">${esc(x.severity)}</span>${badge(x.status!=='OPEN',x.status,x.status)}${badge(x.email_status==='SENT','Email sent',x.email_status||'Email pending')}${badge(rcaStatus==='COMPLETED',rcaStatus,rcaStatus)}<span class="drawer-action-spacer"></span>${closeAction}</div>
+   <div id="closure-form" class="closure-form" hidden><label for="closure-remark">RCA closure remark <span class="danger-text">*</span></label><textarea id="closure-remark" maxlength="5000" rows="4" placeholder="Document the RCA conclusion, corrective action, and reason for closure (minimum 3 characters)"></textarea><div class="closure-form-actions"><button class="smallbtn" onclick="cancelClosureForm()">Cancel</button><button class="smallbtn danger-btn" onclick="submitClosure('${esc(x.id)}')">Save remark &amp; close</button></div></div>
+   ${closureSection}
    ${rcaSection('RCA PROCESSING DETAILS',rcaProgress)}
    ${rcaSection('INCIDENT SUMMARY','<p>'+esc(r.incident_summary||x.summary||'')+'</p>')}
    ${rcaSection('ROOT CAUSE · '+esc(r.confidence||'Confidence pending'),'<p>'+esc(rootCauseText)+'</p>')}
@@ -413,23 +426,36 @@ async function openIncident(id){
  }catch(e){$('drawer-content').innerHTML='<p class="empty">Unable to load incident: '+esc(e.message)+'</p>'}
 }
 function closeIncident(){$('incident-drawer').classList.remove('open')}
-async function closeIncidentRecord(id){
- if(!confirm('Close this incident? This changes its status to CLOSED.'))return;
+function showClosureForm(id){
+ const form=$('closure-form');
+ if(!form)return;
+ form.hidden=false;
+ $('closure-remark')?.focus();
+}
+function cancelClosureForm(){
+ const form=$('closure-form');
+ if(form)form.hidden=true;
+}
+async function submitClosure(id){
+ const field=$('closure-remark');
+ const remark=(field?.value||'').trim();
+ if(remark.length<3){alert('Please enter an RCA closure remark (at least 3 characters).');field?.focus();return;}
+ if(!confirm('Save this closure remark and close the incident?'))return;
  try{
   const response=await fetch('/incidents/'+encodeURIComponent(id)+'/close',{
-   method:'POST',headers:{'Accept':'application/json'}
+   method:'POST',
+   headers:{'Accept':'application/json','Content-Type':'application/json'},
+   body:JSON.stringify({remark})
   });
   if(!response.ok){
    let detail='HTTP '+response.status;
-   try{const body=await response.json();if(body.detail)detail=body.detail}catch(_e){}
+   try{const body=await response.json();if(body.detail)detail=typeof body.detail==='string'?body.detail:JSON.stringify(body.detail)}catch(_e){}
    throw new Error(detail);
   }
   await loadIncidents();
   renderRcaDashboard();
   await openIncident(id);
- }catch(error){
-  alert('Could not close incident: '+error.message);
- }
+ }catch(error){alert('Could not close incident: '+error.message);}
 }
 function goTo(id){document.getElementById(id)?.scrollIntoView({behavior:'smooth',block:'start'})}
 
