@@ -170,6 +170,7 @@ def namespaces():
 
 @router.get("/topology")
 def topology(namespace: str | None = None):
+    """Read-only namespace inventory plus resource details and selector relationships."""
     v1, apps = core()
     try:
         ns_items = [n for n in v1.list_namespace().items if n.metadata.name not in settings.excluded_namespaces]
@@ -188,24 +189,51 @@ def topology(namespace: str | None = None):
                      if i.metadata.namespace not in settings.excluded_namespaces]
     except ApiException as e:
         raise HTTPException(status_code=502, detail=f"Topology inventory unavailable: {e.reason}")
-    groups = {}
-    for n in ns_items:
-        groups[n.metadata.name] = {"namespace": n.metadata.name, "pods": 0, "services": 0,
-                                   "deployments": 0, "pvcs": 0, "ingresses": 0, "resources": 0}
-    for key, items in [("pods", pods), ("services", services), ("deployments", deps), ("pvcs", pvcs), ("ingresses", ingresses)]:
-        for item in items:
-            ns = item.metadata.namespace
-            if ns in groups: groups[ns][key] += 1
-    for g in groups.values(): g["resources"] = sum(g[k] for k in ("pods", "services", "deployments", "pvcs", "ingresses"))
+
+    groups = {n.metadata.name: {"namespace": n.metadata.name, "pods": 0, "services": 0,
+              "deployments": 0, "pvcs": 0, "ingresses": 0, "resources": 0} for n in ns_items}
+    resource_items = {name: [] for name in groups}
+    def add_resource(ns, kind, name, status="Unknown", details=""):
+        if ns in groups:
+            resource_items[ns].append({"kind": kind, "name": name, "status": status, "details": details})
+            key = {"Pod":"pods", "Service":"services", "Deployment":"deployments",
+                   "PVC":"pvcs", "Ingress":"ingresses"}[kind]
+            groups[ns][key] += 1
+
+    for p in pods:
+        add_resource(p.metadata.namespace, "Pod", p.metadata.name, p.status.phase or "Unknown",
+                     "Node: " + (p.spec.node_name or "Unassigned"))
+    for svc in services:
+        add_resource(svc.metadata.namespace, "Service", svc.metadata.name,
+                     svc.spec.type or "ClusterIP", "Ports: " + ", ".join(str(x.port) for x in (svc.spec.ports or [])))
+    for d in deps:
+        ready = d.status.ready_replicas or 0
+        desired = d.spec.replicas or 0
+        add_resource(d.metadata.namespace, "Deployment", d.metadata.name,
+                     f"{ready}/{desired} ready", "Images: " + ", ".join(c.image or "unknown" for c in (d.spec.template.spec.containers or [])))
+    for pvc in pvcs:
+        cap = (pvc.status.capacity or {}).get("storage", "") if pvc.status else ""
+        add_resource(pvc.metadata.namespace, "PVC", pvc.metadata.name,
+                     pvc.status.phase if pvc.status else "Unknown", "Storage: " + str(cap))
+    for ing in ingresses:
+        hosts = sorted({r.host for r in (ing.spec.rules or []) if r.host}) if ing.spec else []
+        add_resource(ing.metadata.namespace, "Ingress", ing.metadata.name,
+                     "Configured", "Hosts: " + (", ".join(hosts) if hosts else "No host rules"))
+
+    for g in groups.values():
+        g["resources"] = sum(g[k] for k in ("pods", "services", "deployments", "pvcs", "ingresses"))
+
     edges = []
     pod_by_ns = {}
-    for p in pods: pod_by_ns.setdefault(p.metadata.namespace, []).append(p)
+    for p in pods:
+        pod_by_ns.setdefault(p.metadata.namespace, []).append(p)
     for svc in services:
         selector = svc.spec.selector or {}
-        if not selector: continue
+        if not selector:
+            continue
         matched = [p for p in pod_by_ns.get(svc.metadata.namespace, [])
                    if all((p.metadata.labels or {}).get(k) == v for k, v in selector.items())]
-        for p in matched[:50]:
+        for p in matched[:100]:
             edges.append({"namespace": svc.metadata.namespace, "from": "Service/"+svc.metadata.name,
                           "to": "Pod/"+p.metadata.name, "type": "selects"})
     for ing in ingresses:
@@ -222,7 +250,7 @@ def topology(namespace: str | None = None):
             if claim and pod.metadata.namespace + "/" + claim in pvc_names:
                 edges.append({"namespace": pod.metadata.namespace, "from": "Pod/"+pod.metadata.name,
                               "to": "PVC/"+claim, "type": "mounts"})
-    return {"namespaces": list(groups.values()), "edges": edges,
+    return {"namespaces": list(groups.values()), "resources": resource_items, "edges": edges,
             "totals": {k: sum(g[k] for g in groups.values()) for k in ("pods", "services", "deployments", "pvcs", "ingresses", "resources")}}
 
 @router.get("/applications")
