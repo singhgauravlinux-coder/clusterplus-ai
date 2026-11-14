@@ -1,8 +1,31 @@
 import asyncio
 import smtplib
+from datetime import datetime, timezone
 from html import escape
 from email.message import EmailMessage
 from app.config import settings
+
+def _incident_timing(incident):
+    opened = incident.created_at
+    if opened is None:
+        return "Unknown", "Unknown"
+    if opened.tzinfo is None:
+        opened = opened.replace(tzinfo=timezone.utc)
+    now = datetime.now(timezone.utc)
+    opened_utc = opened.astimezone(timezone.utc)
+    seconds = max(0, int((now - opened_utc).total_seconds()))
+    days, remainder = divmod(seconds, 86400)
+    hours, remainder = divmod(remainder, 3600)
+    minutes = remainder // 60
+    parts = []
+    if days:
+        parts.append(f"{days} day" + ("s" if days != 1 else ""))
+    if hours:
+        parts.append(f"{hours} hour" + ("s" if hours != 1 else ""))
+    if minutes or not parts:
+        parts.append(f"{minutes} minute" + ("s" if minutes != 1 else ""))
+    return opened_utc.strftime("%Y-%m-%d %H:%M:%S UTC"), ", ".join(parts)
+
 
 def _format_rca(incident, rca):
     def items(key):
@@ -11,9 +34,9 @@ def _format_rca(incident, rca):
         f"<li><b>{escape(str(w.get('why','Why?')))}</b> {escape(str(w.get('answer','')))}</li>"
         for w in rca.get("five_whys", [])
     )
+    opened_at, open_duration = _incident_timing(incident)
     return f"""<h2>Kubernetes incident RCA</h2>
-<p><b>Incident:</b> {escape(incident.id)} | <b>Severity:</b> {escape(incident.severity)}</p>
-<p><b>Cluster:</b> {escape(settings.cluster_name)} | <b>Namespace:</b> {escape(incident.namespace)}
+<p><b>Incident:</b> {escape(incident.id)} | <b>Severity:</b> {escape(incident.severity)}</p>\n<p><b>Opened at:</b> {escape(opened_at)} | <b>Open duration at email:</b> {escape(open_duration)}</p>\n<p><b>Cluster:</b> {escape(settings.cluster_name)} | <b>Namespace:</b> {escape(incident.namespace)}
 | <b>Pod:</b> {escape(incident.pod_name)} | <b>Node:</b> {escape(incident.node_name)}</p>
 <h3>Summary</h3><p>{escape(str(rca.get('incident_summary','')))}</p>
 <h3>Root cause ({escape(str(rca.get('confidence','unknown')))} confidence)</h3>
@@ -39,7 +62,8 @@ async def send_incident_email(incident, rca):
     message["To"] = ", ".join(settings.recipients)
     if settings.email_cc:
         message["Cc"] = settings.email_cc
-    message.set_content("Kubernetes incident RCA report. Please view this message in an HTML-capable email client.")
+    opened_at, open_duration = _incident_timing(incident)
+    message.set_content(f"Kubernetes incident RCA report.\nOpened at: {opened_at}\nOpen duration at email: {open_duration}\nPlease view this message in an HTML-capable email client.")
     message.add_alternative(_format_rca(incident, rca), subtype="html")
     recipients = list(settings.recipients) + [x.strip() for x in settings.email_cc.split(",") if x.strip()]
 
