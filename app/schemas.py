@@ -1,5 +1,16 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, Field, field_validator
 from typing import Any
+
+class CloseIncidentRequest(BaseModel):
+    remark: str = Field(min_length=3, max_length=5000)
+
+    @field_validator("remark")
+    @classmethod
+    def validate_remark(cls, value: str) -> str:
+        value = value.strip()
+        if len(value) < 3:
+            raise ValueError("Closure remark must contain at least 3 non-whitespace characters")
+        return value
 
 class IncidentOut(BaseModel):
     id: str
@@ -16,5 +27,8 @@ class IncidentOut(BaseModel):
     rca_last_error: str | None
     email_status: str
     occurrences: int
+    created_at: Any | None = None
+    closed_at: Any | None = None
+    closure_remark: str | None = None
     class Config:
         from_attributes = True
