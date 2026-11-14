@@ -255,7 +255,11 @@ body{background:radial-gradient(ellipse at 12% 8%,rgba(15,104,130,.22),transpare
 .log-line.level-INFO{color:#91c5ff}.log-line.level-DBG{color:#aab8cc}
 @media(max-width:760px){.log-toolbar select{flex:1;min-width:135px}.log-search{order:3;flex-basis:100%}.log-filterbar{align-items:flex-start}}
 
-.management-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:14px;margin:16px 0}.topology-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px}.topology-ns-card{padding:17px;border:1px solid var(--glass-line);border-radius:15px;background:linear-gradient(145deg,rgba(20,54,86,.8),rgba(10,23,40,.8))}.topology-ns-card h3{color:#83bcff!important;font-size:16px!important;margin:0 0 12px!important}.topology-counts{display:flex;flex-wrap:wrap;gap:7px}.topology-counts span{font-size:10px;padding:6px 8px;border-radius:8px;background:rgba(80,120,170,.15);color:#bfd1e5}.timeline-list{display:grid;gap:9px}.timeline-event{display:grid;grid-template-columns:155px 72px minmax(120px,1fr);gap:12px;padding:13px 15px;border:1px solid var(--glass-line);border-radius:12px;background:rgba(14,34,54,.68)}.timeline-event p{grid-column:3;margin:0;color:#9fb3c9;font-size:11px;overflow-wrap:anywhere}.timeline-event time{font-size:10px;color:#8fa6bf}.notice{padding:14px 16px;margin:14px 0;border:1px solid var(--glass-line);border-radius:12px;background:rgba(22,49,73,.55);color:#a9bfd4;font-size:12px;line-height:1.6}.cost-card{padding:22px;margin:16px 0}.cost-card .metric{font-size:30px;margin:14px 0}.status-pass{color:#63dfb3}.status-warn{color:#ffc36a}.status-fail{color:#ff7888}.page-view select{max-width:240px;margin-right:8px}@media(max-width:760px){.timeline-event{grid-template-columns:1fr;gap:5px}.timeline-event p{grid-column:1}.management-grid{grid-template-columns:1fr}}
+.management-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:14px;margin:16px 0}.topology-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px}.topology-ns-card{padding:17px;border:1px solid var(--glass-line);border-radius:15px;background:linear-gradient(145deg,rgba(20,54,86,.8),rgba(10,23,40,.8))}.topology-ns-card h3{color:#83bcff!important;font-size:16px!important;margin:0 0 12px!important}.topology-counts{display:flex;flex-wrap:wrap;gap:7px}.topology-counts span{font-size:10px;padding:6px 8px;border-radius:8px;background:rgba(80,120,170,.15);color:#bfd1e5}
+.topology-summary-button{width:100%;text-align:left;cursor:pointer;color:inherit;font:inherit}.topology-summary-button:hover{border-color:#4bd4e4;transform:translateY(-1px)}.topology-ns-card{position:relative;transition:border-color .18s,transform .18s}.topology-ns-card:hover{border-color:rgba(71,211,235,.65);transform:translateY(-1px)}
+.topology-ns-head{display:flex;align-items:center;justify-content:space-between;gap:10px}.topology-expand{border:1px solid var(--glass-line);background:rgba(72,130,190,.18);color:#cce8ff;border-radius:8px;padding:6px 10px;cursor:pointer}.topology-counts button{font:inherit;font-size:10px;padding:7px 9px;border-radius:8px;border:1px solid rgba(105,170,220,.18);background:rgba(80,120,170,.15);color:#bfd1e5;cursor:pointer}.topology-counts button:hover,.topology-counts button.active{background:rgba(42,175,205,.25);border-color:#4bd4e4;color:#e9fcff;box-shadow:0 0 14px rgba(57,204,224,.12)}
+.topology-resource-list{display:none;margin-top:13px;padding-top:12px;border-top:1px solid var(--glass-line)}.topology-ns-card.expanded .topology-resource-list{display:block}.topology-resource-list h4{font-size:11px;color:#75dfea;margin:0 0 9px}.topology-resource-list .topology-resource-item{display:flex;justify-content:space-between;gap:12px;padding:8px 9px;margin:5px 0;border:1px solid rgba(110,170,210,.12);border-radius:8px;background:rgba(4,16,29,.35);font-size:10px;color:#c4d7e9;cursor:pointer;text-align:left;width:100%}.topology-resource-item:hover{border-color:#4bd4e4;background:rgba(25,95,120,.28)}.topology-resource-item small{color:#8da8c1}.topology-empty{font-size:10px;color:#8da8c1;padding:7px}.topology-graph{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;align-items:center;padding:15px;margin:14px 0;border:1px solid var(--glass-line);border-radius:13px;background:rgba(7,22,38,.45)}.topology-graph-node{padding:11px;border:1px solid rgba(79,190,220,.35);border-radius:9px;background:rgba(21,66,91,.45);font-size:10px;color:#d3edff;text-align:center;overflow-wrap:anywhere}.topology-graph-node small{display:block;color:#8da8c1;margin-top:5px}.topology-graph-arrow{text-align:center;color:#60dbe7;font-size:18px}.topology-graph-empty{grid-column:1/-1;color:#91a8bf;font-size:11px}
+.timeline-list{display:grid;gap:9px}.timeline-event{display:grid;grid-template-columns:155px 72px minmax(120px,1fr);gap:12px;padding:13px 15px;border:1px solid var(--glass-line);border-radius:12px;background:rgba(14,34,54,.68)}.timeline-event p{grid-column:3;margin:0;color:#9fb3c9;font-size:11px;overflow-wrap:anywhere}.timeline-event time{font-size:10px;color:#8fa6bf}.notice{padding:14px 16px;margin:14px 0;border:1px solid var(--glass-line);border-radius:12px;background:rgba(22,49,73,.55);color:#a9bfd4;font-size:12px;line-height:1.6}.cost-card{padding:22px;margin:16px 0}.cost-card .metric{font-size:30px;margin:14px 0}.status-pass{color:#63dfb3}.status-warn{color:#ffc36a}.status-fail{color:#ff7888}.page-view select{max-width:240px;margin-right:8px}@media(max-width:760px){.timeline-event{grid-template-columns:1fr;gap:5px}.timeline-event p{grid-column:1}.management-grid{grid-template-columns:1fr}}
 
 </style>
 <style id="cp-neo">
@@ -582,6 +586,34 @@ td.status-fail:before{animation:neoPulse 1.8s infinite}
 .page-view .section select:focus{outline:none;border-color:var(--neo-cyan);box-shadow:0 0 0 3px rgba(56,232,255,.18)}
 @media(max-width:650px){#page-checks .grid,#page-traffic .grid,#page-capacity .grid,#page-cost .grid{grid-template-columns:1fr}}
 </style>
+<style id="cp-topo">
+/* ===== Interactive topology visuals (expand/collapse cards, drill-down, relationship graph) ===== */
+.topology-summary-button{position:relative;overflow:hidden;text-align:left}
+.topology-summary-button .metric-head span:last-child{color:var(--neo-cyan);transition:transform .25s}
+.topology-summary-button:hover .metric-head span:last-child{transform:translate(3px,-3px)}
+.topology-summary-button:hover{transform:translateY(-4px)!important;box-shadow:0 18px 44px rgba(0,0,0,.35),0 0 30px rgba(56,232,255,.28)!important;animation-play-state:paused}
+.topology-summary-button:after{content:"";position:absolute;right:-24px;bottom:-24px;width:90px;height:90px;border-radius:50%;background:var(--neo-cyan);opacity:.10;filter:blur(12px)}
+.topology-ns-card.expanded{animation:none;border-color:rgba(56,232,255,.55)!important;box-shadow:0 0 36px rgba(56,232,255,.18)}
+.topology-ns-card.expanded:hover{transform:none}
+.topology-ns-head h3 small{color:#7f9bb8;font-weight:500}
+.topology-expand{transition:all .2s;font-size:11px;letter-spacing:.4px}
+.topology-expand:hover,.topology-expand[aria-expanded="true"]{background:linear-gradient(135deg,rgba(56,232,255,.28),rgba(139,123,255,.28))!important;border-color:var(--neo-cyan)!important;box-shadow:0 0 16px rgba(56,232,255,.3)}
+.topology-counts button{transition:all .2s;border:1px solid rgba(56,232,255,.18)}
+.topology-counts button:hover{transform:translateY(-2px)}
+.topology-ns-card.expanded .topology-resource-list{animation:riseIn .35s cubic-bezier(.2,.8,.2,1) both}
+.topology-resource-list h4{letter-spacing:1.4px;background:linear-gradient(90deg,var(--neo-cyan),var(--neo-violet));-webkit-background-clip:text;background-clip:text;color:transparent}
+.topology-resource-item{transition:all .2s}
+.topology-resource-item:hover{transform:translateX(5px);box-shadow:0 0 16px rgba(56,232,255,.2)}
+.topology-resource-item small{padding:2px 7px;border-radius:20px;border:1px solid rgba(61,255,181,.3);color:var(--neo-green)}
+.topology-graph{background:linear-gradient(135deg,rgba(7,22,38,.6),rgba(26,24,70,.35));box-shadow:inset 0 0 30px rgba(56,232,255,.05)}
+.topology-graph-node{transition:transform .2s,box-shadow .2s;box-shadow:0 0 16px rgba(56,232,255,.12)}
+.topology-graph-node:hover{transform:translateY(-3px);box-shadow:0 0 24px rgba(56,232,255,.4)}
+.topology-graph-arrow{color:var(--neo-cyan);text-shadow:0 0 12px var(--neo-cyan);animation:arrowPulse 1.6s infinite}
+.topology-graph-arrow small{display:block;font-size:9px;color:#8da8c1;text-shadow:none}
+#page-topology .section .smallbtn{border-color:rgba(56,232,255,.3);background:linear-gradient(135deg,rgba(56,232,255,.14),rgba(139,123,255,.14))}
+#topology-detail-title{text-shadow:0 0 14px rgba(56,232,255,.35)}
+#topology-resource-rows tr:not(:has(.empty)) td:nth-child(3) b{color:#d6f6ff}
+</style>
 </head>
 <body>
 <aside class="glass-sidebar">
@@ -723,9 +755,10 @@ td.status-fail:before{animation:neoPulse 1.8s infinite}
 </section>
 <section class="page-view" id="page-topology" data-page="topology" hidden>
  <div class="page-heading"><div><div class="eyebrow">CLUSTER MAP</div><h2>Topology</h2><p>Namespace resource groups and Service-to-Pod selector relationships. Read-only inventory.</p></div><span class="page-chip">AUTO REFRESH</span></div>
- <div class="section"><h2>Resource topology</h2><select id="topology-ns" onchange="loadTopology()"><option value="">All namespaces</option></select></div>
+ <div class="section"><h2>Resource topology</h2><select id="topology-ns" onchange="loadTopology()"><option value="">All namespaces</option></select><button class="smallbtn" onclick="expandAllTopology(true)">Expand all</button><button class="smallbtn" onclick="expandAllTopology(false)">Collapse all</button></div>
  <div class="grid" id="topology-summary"></div><div class="topology-grid" id="topology-groups"></div>
- <div class="section"><h2>Service relationships</h2><span>Selector matches from current pod labels</span></div><div class="card tablewrap"><table><thead><tr><th>NAMESPACE</th><th>SERVICE</th><th>RELATION</th><th>POD</th></tr></thead><tbody id="topology-edges"></tbody></table></div>
+ <div class="section"><h2 id="topology-detail-title">Resource details</h2><span id="topology-detail-hint">Select a resource category on any namespace card.</span></div><div class="card tablewrap"><table><thead><tr><th>NAMESPACE</th><th>KIND</th><th>RESOURCE</th><th>STATUS</th><th>DETAILS</th></tr></thead><tbody id="topology-resource-rows"><tr><td colspan="5" class="empty">Choose Pods, Services, Deployments, Ingresses or PVCs to inspect resources.</td></tr></tbody></table></div>
+ <div class="section"><h2>Resource relationships</h2><span>Service selectors, Ingress routes and PVC mounts</span></div><div class="card tablewrap"><table><thead><tr><th>NAMESPACE</th><th>SOURCE</th><th>RELATION</th><th>TARGET</th></tr></thead><tbody id="topology-edges"></tbody></table></div>
 </section>
 <section class="page-view" id="page-applications" data-page="applications" hidden>
  <div class="page-heading"><div><div class="eyebrow">APPLICATION INVENTORY</div><h2>Applications</h2><p>Application groups inferred from Kubernetes workload labels.</p></div><span class="page-chip">READ ONLY</span></div>
@@ -1066,8 +1099,45 @@ function setTheme(mode){$('themeMode').value=mode;try{localStorage.setItem('clus
 
 const nsSelectors=['topology-ns','apps-ns','timeline-ns'];
 async function populateNamespaces(){try{const rows=await api('/api/namespaces');nsSelectors.forEach(id=>{const el=$(id);if(!el)return;const val=el.value;el.innerHTML='<option value="">All namespaces</option>'+rows.map(x=>`<option value="${esc(x.name)}">${esc(x.name)}</option>`).join('');el.value=val})}catch(e){console.warn('Namespace list unavailable',e)}}
-async function loadTopology(){const d=await api('/api/topology'+($('topology-ns').value?'?namespace='+encodeURIComponent($('topology-ns').value):''));$('topology-summary').innerHTML=Object.entries(d.totals).map(([k,v])=>`<div class="card"><div class="metric-head"><span>${esc(k.toUpperCase())}</span></div><div class="metric cyan">${v}</div></div>`).join('');$('topology-groups').innerHTML=d.namespaces.map(n=>`<div class="topology-ns-card"><h3>⬡ ${esc(n.namespace)} <small>· ${n.resources} resources</small></h3><div class="topology-counts">${['deployments','services','pods','ingresses','pvcs'].map(k=>`<span>${n[k]} ${k}</span>`).join('')}</div></div>`).join('')||'<div class="notice">No namespaces found.</div>';$('topology-edges').innerHTML=d.edges.map(e=>`<tr><td>${esc(e.namespace)}</td><td>${esc(e.from)}</td><td>${esc(e.type)}</td><td>${esc(e.to)}</td></tr>`).join('')||'<tr><td colspan="4" class="empty">No Service selector matches found.</td></tr>'}
-async function loadApplications(){const ns=$('apps-ns').value;const d=await api('/api/applications'+(ns?'?namespace='+encodeURIComponent(ns):''));$('apps-rows').innerHTML=d.map(a=>`<tr><td>${esc(a.namespace)}</td><td><b>${esc(a.name)}</b></td><td>${a.workloads.map(w=>esc(w.kind)+': '+esc(w.name)).join('<br>')}</td><td>${a.pods}</td><td>${a.ready}</td><td>${a.desired}</td><td>${badge(a.ready>=a.desired,'Healthy','Degraded')}</td></tr>`).join('')||'<tr><td colspan="7" class="empty">No labeled Deployment or StatefulSet applications found.</td></tr>'}
+let topologySnapshot=null;
+function topologyCardResources(namespace,kind){
+ if(!topologySnapshot)return [];
+ return (topologySnapshot.resources?.[namespace]||[]).filter(x=>x.kind.toLowerCase()===(kind||'').toLowerCase());
+}
+function renderTopologyResources(namespace,kind){
+ const rows=topologyCardResources(namespace,kind);
+ $('topology-detail-title').textContent=(kind||'Resources')+' · '+namespace;
+ $('topology-detail-hint').textContent=rows.length+' matching resources · read-only inventory';
+ $('topology-resource-rows').innerHTML=rows.map(x=>`<tr><td>${esc(namespace)}</td><td>${esc(x.kind)}</td><td><b>${esc(x.name)}</b></td><td>${esc(x.status||'Unknown')}</td><td>${esc(x.details||'—')}</td></tr>`).join('')||'<tr><td colspan="5" class="empty">No resources in this category for this namespace.</td></tr>';
+}
+function renderTopologyAllResources(key){
+ const map={pods:'Pod',services:'Service',deployments:'Deployment',ingresses:'Ingress',pvcs:'PVC'};
+ const kind=map[key];const rows=[];
+ Object.entries(topologySnapshot?.resources||{}).forEach(([ns,items])=>(items||[]).filter(x=>!kind||x.kind===kind).forEach(x=>rows.push({namespace:ns,...x})));
+ $('topology-detail-title').textContent=(kind||'All resources')+' · All namespaces';
+ $('topology-detail-hint').textContent=rows.length+' matching resources · read-only inventory';
+ $('topology-resource-rows').innerHTML=rows.map(x=>`<tr><td>${esc(x.namespace)}</td><td>${esc(x.kind)}</td><td><b>${esc(x.name)}</b></td><td>${esc(x.status||'Unknown')}</td><td>${esc(x.details||'—')}</td></tr>`).join('')||'<tr><td colspan="5" class="empty">No matching resources found.</td></tr>';
+}
+function toggleTopologyCard(namespace,force){
+ const card=[...document.querySelectorAll('.topology-ns-card')].find(x=>x.dataset.namespace===namespace);
+ if(!card)return;
+ const open=force===undefined?!card.classList.contains('expanded'):!!force;
+ card.classList.toggle('expanded',open);
+ const btn=card.querySelector('.topology-expand');if(btn){btn.textContent=open?'Collapse':'Expand';btn.setAttribute('aria-expanded',String(open));}
+}
+function expandAllTopology(open){document.querySelectorAll('.topology-ns-card').forEach(card=>toggleTopologyCard(card.dataset.namespace,open));}
+function renderTopologyGraph(namespace){
+ const edges=(topologySnapshot?.edges||[]).filter(e=>e.namespace===namespace);
+ if(!edges.length)return '<div class="topology-graph"><div class="topology-graph-empty">No selector, ingress or PVC relationships discovered in this namespace. Resource inventory is still available above.</div></div>';
+ return '<div class="topology-graph">'+edges.slice(0,30).map(e=>`<div class="topology-graph-node">${esc(e.from)}<small>${esc(e.namespace)}</small></div><div class="topology-graph-arrow">→<small>${esc(e.type)}</small></div><div class="topology-graph-node">${esc(e.to)}<small>relationship target</small></div>`).join('')+'</div>';
+}
+async function loadTopology(){
+ const d=await api('/api/topology'+($('topology-ns').value?'?namespace='+encodeURIComponent($('topology-ns').value):''));topologySnapshot=d;
+ $('topology-summary').innerHTML=Object.entries(d.totals).map(([k,v])=>`<button type="button" class="card topology-summary-button" onclick="renderTopologyAllResources('${k}')" title="Show ${esc(k)} across namespaces"><div class="metric-head"><span>${esc(k.toUpperCase())}</span><span>↗</span></div><div class="metric cyan">${v}</div></button>`).join('');
+ $('topology-groups').innerHTML=d.namespaces.map(n=>`<div class="topology-ns-card" data-namespace="${esc(n.namespace)}"><div class="topology-ns-head"><h3>⬡ ${esc(n.namespace)} <small>· ${n.resources} resources</small></h3><button class="topology-expand" aria-expanded="false" onclick="toggleTopologyCard('${esc(n.namespace)}')">Expand</button></div><div class="topology-counts">${[['Deployment','deployments'],['Service','services'],['Pod','pods'],['Ingress','ingresses'],['PVC','pvcs']].map(([kind,key])=>`<button type="button" onclick="renderTopologyResources('${esc(n.namespace)}','${kind}');toggleTopologyCard('${esc(n.namespace)}',true)" title="Show ${key} in ${esc(n.namespace)}">${n[key]} ${key}</button>`).join('')}</div><div class="topology-resource-list"><h4>RESOURCE RELATIONSHIP GRAPH</h4>${renderTopologyGraph(n.namespace)}<h4>RESOURCE INVENTORY</h4>${['Deployment','Service','Pod','Ingress','PVC'].map(kind=>{const items=topologyCardResources(n.namespace,kind);return `<div class="topology-resource-group"><h4>${kind}s (${items.length})</h4>${items.length?items.map(x=>`<button class="topology-resource-item" type="button" onclick="renderTopologyResources('${esc(n.namespace)}','${kind}')"><span>${esc(x.name)}</span><small>${esc(x.status||'Unknown')}</small></button>`).join(''):'<div class="topology-empty">None found</div>'}</div>`}).join('')}</div></div>`).join('')||'<div class="notice">No namespaces found.</div>';
+ $('topology-edges').innerHTML=d.edges.map(e=>`<tr><td>${esc(e.namespace)}</td><td>${esc(e.from)}</td><td>${esc(e.type)}</td><td>${esc(e.to)}</td></tr>`).join('')||'<tr><td colspan="4" class="empty">No resource relationships found.</td></tr>';
+}
+async function loadApplications(){const d=await api('/api/applications'+(ns?'?namespace='+encodeURIComponent(ns):''));$('apps-rows').innerHTML=d.map(a=>`<tr><td>${esc(a.namespace)}</td><td><b>${esc(a.name)}</b></td><td>${a.workloads.map(w=>esc(w.kind)+': '+esc(w.name)).join('<br>')}</td><td>${a.pods}</td><td>${a.ready}</td><td>${a.desired}</td><td>${badge(a.ready>=a.desired,'Healthy','Degraded')}</td></tr>`).join('')||'<tr><td colspan="7" class="empty">No labeled Deployment or StatefulSet applications found.</td></tr>'}
 async function loadTimeline(){const ns=$('timeline-ns').value,limit=$('timeline-limit').value;const d=await api('/api/timeline?limit='+limit+(ns?'&namespace='+encodeURIComponent(ns):''));$('timeline-list').innerHTML=d.map(e=>`<div class="timeline-event"><time>${e.time?new Date(e.time).toLocaleString():'Time unavailable'}</time><b class="${e.type==='Warning'?'status-fail':'status-pass'}">${esc(e.type)}</b><div><b>${esc(e.reason)}</b><div class="visual-note">${esc(e.namespace)} · ${esc(e.object)} · x${e.count}</div></div><p>${esc(e.message)}</p></div>`).join('')||'<div class="notice">No Kubernetes events returned.</div>'}
 function humanRate(n){if(n==null)return '—';const units=['B/s','KB/s','MB/s','GB/s'];let i=0;while(n>=1024&&i<3){n/=1024;i++}return n.toFixed(1)+' '+units[i]}
 async function loadTraffic(){const d=await api('/api/traffic');if(!d.configured){$('traffic-note').textContent=d.note;$('traffic-rows').innerHTML='<tr><td colspan="4" class="empty">Prometheus network metrics are not configured.</td></tr>';return}const rx=d.receive_bytes_per_second||[],tx=d.transmit_bytes_per_second||[],m={};rx.forEach(x=>{const k=(x.metric.namespace||'')+'/'+(x.metric.pod||'');m[k]=m[k]||{rx:0,tx:0};m[k].rx=x.value});tx.forEach(x=>{const k=(x.metric.namespace||'')+'/'+(x.metric.pod||'');m[k]=m[k]||{rx:0,tx:0};m[k].tx=x.value});$('traffic-rx').textContent=humanRate(rx.reduce((a,x)=>a+x.value,0));$('traffic-tx').textContent=humanRate(tx.reduce((a,x)=>a+x.value,0));$('traffic-note').textContent='Prometheus sample · refreshed with dashboard polling';$('traffic-rows').innerHTML=Object.entries(m).map(([k,v])=>`<tr><td>${esc(k.split('/')[0])}</td><td>${esc(k.split('/').slice(1).join('/'))}</td><td>${humanRate(v.rx)}</td><td>${humanRate(v.tx)}</td></tr>`).join('')||'<tr><td colspan="4" class="empty">No network series returned. Ensure cAdvisor exports container network metrics.</td></tr>'}
