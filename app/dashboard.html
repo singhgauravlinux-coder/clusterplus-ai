@@ -254,6 +254,9 @@ body{background:radial-gradient(ellipse at 12% 8%,rgba(15,104,130,.22),transpare
 .log-line{display:block;min-height:1.55em}.log-line.level-ERR{color:#ff7785}.log-line.level-WARN{color:#ffc36a}
 .log-line.level-INFO{color:#91c5ff}.log-line.level-DBG{color:#aab8cc}
 @media(max-width:760px){.log-toolbar select{flex:1;min-width:135px}.log-search{order:3;flex-basis:100%}.log-filterbar{align-items:flex-start}}
+
+.management-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:14px;margin:16px 0}.topology-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px}.topology-ns-card{padding:17px;border:1px solid var(--glass-line);border-radius:15px;background:linear-gradient(145deg,rgba(20,54,86,.8),rgba(10,23,40,.8))}.topology-ns-card h3{color:#83bcff!important;font-size:16px!important;margin:0 0 12px!important}.topology-counts{display:flex;flex-wrap:wrap;gap:7px}.topology-counts span{font-size:10px;padding:6px 8px;border-radius:8px;background:rgba(80,120,170,.15);color:#bfd1e5}.timeline-list{display:grid;gap:9px}.timeline-event{display:grid;grid-template-columns:155px 72px minmax(120px,1fr);gap:12px;padding:13px 15px;border:1px solid var(--glass-line);border-radius:12px;background:rgba(14,34,54,.68)}.timeline-event p{grid-column:3;margin:0;color:#9fb3c9;font-size:11px;overflow-wrap:anywhere}.timeline-event time{font-size:10px;color:#8fa6bf}.notice{padding:14px 16px;margin:14px 0;border:1px solid var(--glass-line);border-radius:12px;background:rgba(22,49,73,.55);color:#a9bfd4;font-size:12px;line-height:1.6}.cost-card{padding:22px;margin:16px 0}.cost-card .metric{font-size:30px;margin:14px 0}.status-pass{color:#63dfb3}.status-warn{color:#ffc36a}.status-fail{color:#ff7888}.page-view select{max-width:240px;margin-right:8px}@media(max-width:760px){.timeline-event{grid-template-columns:1fr;gap:5px}.timeline-event p{grid-column:1}.management-grid{grid-template-columns:1fr}}
+
 </style>
 <style id="cp-neo">
 /* ===== ClusterPulse NEO visual layer (presentation only) ===== */
@@ -496,6 +499,89 @@ tbody tr:hover{background:linear-gradient(90deg,rgba(56,232,255,.12),rgba(139,12
 @keyframes statusBlink{50%{opacity:.65}}
 #page-logs .logbox{min-height:340px}
 </style>
+<style id="cp-mgmt">
+/* ===== Management pages visuals (Topology, Applications, Timeline, Live Traffic, Helm, GitOps, Checks, Capacity, Cost) ===== */
+.glass-sidebar{overflow-y:auto;overflow-x:hidden;scrollbar-width:thin;scrollbar-color:rgba(56,232,255,.4) transparent}
+.glass-sidebar::-webkit-scrollbar{width:5px}.glass-sidebar::-webkit-scrollbar-thumb{background:rgba(56,232,255,.4);border-radius:5px}
+@media(min-width:951px){.glass-sidebar{gap:5px}.glass-sidebar .side-link{padding:9px 13px}.side-brand{padding-bottom:12px}.glass-sidebar .side-label{padding-top:11px}}
+.side-label{display:flex;align-items:center;gap:8px}
+.side-label:after{content:"";flex:1;height:1px;background:linear-gradient(90deg,rgba(56,232,255,.35),transparent)}
+@media(max-width:950px){.side-label:after{display:none}}
+
+/* per-page accent line under the heading */
+#page-topology .page-heading h2,#page-gitops .page-heading h2{background-image:linear-gradient(90deg,#fff 15%,#8b7bff 75%)}
+#page-timeline .page-heading h2,#page-cost .page-heading h2{background-image:linear-gradient(90deg,#fff 15%,#ffc15a 80%)}
+#page-checks .page-heading h2,#page-helm .page-heading h2{background-image:linear-gradient(90deg,#fff 15%,#3dffb5 80%)}
+
+/* topology */
+.topology-grid{gap:16px}
+.topology-ns-card{position:relative;overflow:hidden;transition:transform .25s,box-shadow .25s,border-color .25s;animation:floatY 7s ease-in-out infinite;
+ background:linear-gradient(145deg,rgba(24,60,98,.85),rgba(12,22,46,.9))!important}
+.topology-ns-card:nth-child(2n){animation-duration:8.5s;animation-delay:-2s}.topology-ns-card:nth-child(3n){animation-duration:6.4s;animation-delay:-4s}
+.topology-ns-card:before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:linear-gradient(var(--neo-cyan),var(--neo-violet))}
+.topology-ns-card:after{content:"";position:absolute;right:-26px;top:-26px;width:100px;height:100px;border-radius:50%;background:var(--neo-violet);opacity:.13;filter:blur(14px)}
+.topology-ns-card:hover{animation-play-state:paused;transform:translateY(-5px) scale(1.02);border-color:var(--neo-cyan)!important;box-shadow:0 0 34px rgba(56,232,255,.28)}
+.topology-ns-card h3{text-shadow:0 0 14px rgba(131,188,255,.5)}
+.topology-counts span{border:1px solid rgba(56,232,255,.18);transition:all .2s}.topology-counts span:hover{background:rgba(56,232,255,.18);color:#fff;transform:translateY(-2px)}
+#topology-summary .metric{font-size:38px}
+
+/* timeline: a vertical rail with glowing nodes */
+.timeline-list{position:relative;padding-left:22px}
+.timeline-list:before{content:"";position:absolute;left:6px;top:6px;bottom:6px;width:2px;background:linear-gradient(var(--neo-cyan),var(--neo-violet),transparent);border-radius:2px;opacity:.7}
+.timeline-event{position:relative;transition:transform .2s,border-color .2s,background .2s;animation:riseIn .4s cubic-bezier(.2,.8,.2,1) both}
+.timeline-event:before{content:"";position:absolute;left:-21px;top:19px;width:10px;height:10px;border-radius:50%;background:var(--neo-green);box-shadow:0 0 0 3px rgba(61,255,181,.18),0 0 14px var(--neo-green)}
+.timeline-event:has(.status-fail){border-color:rgba(255,77,109,.35);background:linear-gradient(90deg,rgba(255,77,109,.10),rgba(14,34,54,.68))}
+.timeline-event:has(.status-fail):before{background:var(--neo-red);box-shadow:0 0 0 3px rgba(255,77,109,.2),0 0 14px var(--neo-red);animation:neoPulse 1.8s infinite}
+.timeline-event:hover{transform:translateX(6px);border-color:var(--neo-cyan)}
+.timeline-event b.status-pass,.timeline-event b.status-fail{padding:2px 8px;border-radius:20px;height:fit-content;font-size:10px;border:1px solid currentColor;background:rgba(255,255,255,.04)}
+
+/* notices (helm / gitops / capacity) */
+.notice{position:relative;padding-left:46px;border-color:rgba(56,232,255,.28);background:linear-gradient(90deg,rgba(56,232,255,.10),rgba(22,49,73,.55));box-shadow:0 0 26px rgba(56,232,255,.08)}
+.notice:before{content:"i";position:absolute;left:14px;top:50%;margin-top:-12px;width:24px;height:24px;border-radius:50%;display:grid;place-items:center;font:700 13px/1 Georgia,serif;color:#071321;background:linear-gradient(135deg,var(--neo-cyan),var(--neo-violet));box-shadow:0 0 16px rgba(56,232,255,.5)}
+
+/* checks */
+.status-pass,.status-warn,.status-fail{font-weight:800;letter-spacing:.8px;font-size:11px}
+td.status-pass,td.status-warn,td.status-fail{position:relative;padding-left:28px}
+td.status-pass:before,td.status-warn:before,td.status-fail:before{content:"";position:absolute;left:11px;top:50%;margin-top:-4px;width:8px;height:8px;border-radius:50%;background:currentColor;box-shadow:0 0 10px currentColor}
+td.status-pass{color:var(--neo-green)}td.status-warn{color:var(--neo-amber)}td.status-fail{color:var(--neo-red)}
+td.status-fail:before{animation:neoPulse 1.8s infinite}
+#page-checks .grid{grid-template-columns:repeat(3,minmax(0,1fr));margin-bottom:18px}
+#page-checks .grid .card .metric{font-size:48px}
+#page-checks .grid .card:nth-child(1){border-color:rgba(61,255,181,.3)}#page-checks .grid .card:nth-child(2){border-color:rgba(255,193,90,.3)}#page-checks .grid .card:nth-child(3){border-color:rgba(255,77,109,.3)}
+#page-checks .grid .card:nth-child(1):after,#page-checks .grid .card:nth-child(2):after,#page-checks .grid .card:nth-child(3):after{content:"";position:absolute;right:-24px;bottom:-24px;width:110px;height:110px;border-radius:50%;opacity:.14;filter:blur(12px)}
+#page-checks .grid .card:nth-child(1):after{background:var(--neo-green)}#page-checks .grid .card:nth-child(2):after{background:var(--neo-amber)}#page-checks .grid .card:nth-child(3):after{background:var(--neo-red)}
+#page-checks .metric-head span{font-weight:800;letter-spacing:2px}
+
+/* traffic */
+#page-traffic .grid{grid-template-columns:repeat(2,minmax(0,1fr));margin-bottom:6px}
+#page-traffic .metric{font-size:44px}
+#page-traffic .card:nth-child(1) .metric-head span:last-child,#page-traffic .card:nth-child(2) .metric-head span:last-child{padding:3px 9px;border-radius:20px;border:1px solid currentColor;font-size:10px;font-weight:800}
+#page-traffic .grid .card{overflow:hidden}
+#page-traffic .grid .card:after{content:"";position:absolute;left:0;right:0;bottom:0;height:3px;background:linear-gradient(90deg,transparent,var(--neo-cyan),transparent);background-size:200% 100%;animation:trafficFlow 2.4s linear infinite}
+#page-traffic .grid .card:nth-child(2):after{background-image:linear-gradient(90deg,transparent,var(--neo-violet),transparent);animation-direction:reverse}
+@keyframes trafficFlow{from{background-position:200% 0}to{background-position:-200% 0}}
+
+/* capacity meters */
+#page-capacity .grid{grid-template-columns:repeat(2,minmax(0,1fr));margin-bottom:16px}
+#page-capacity .metric{font-size:40px}
+#page-capacity .meter{height:12px;margin-top:16px}
+#page-capacity .meter i{position:relative;transition:width 1.2s cubic-bezier(.2,.8,.2,1)}
+#page-capacity .meter i:after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(255,255,255,.45),transparent);background-size:60% 100%;background-repeat:no-repeat;animation:meterShine 2.4s linear infinite}
+@keyframes meterShine{from{background-position:-100% 0}to{background-position:220% 0}}
+
+/* cost */
+.cost-card{overflow:hidden;border-color:rgba(255,193,90,.35)!important;background:linear-gradient(135deg,rgba(60,44,16,.55),rgba(7,19,34,.8))!important}
+.cost-card:after{content:"";position:absolute;right:-50px;top:-50px;width:220px;height:220px;border-radius:50%;background:radial-gradient(circle,rgba(255,193,90,.28),transparent 70%)}
+.cost-card .metric{font-size:40px;background:linear-gradient(90deg,#fff,var(--neo-amber));-webkit-background-clip:text;background-clip:text;color:transparent;text-shadow:none}
+.cost-card .visual-kicker{color:var(--neo-amber)}
+#page-cost .grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+#page-cost .grid .metric{font-size:38px}
+
+/* namespace / limit selectors inside pages */
+.page-view .section select{background:rgba(10,24,42,.85);border-color:rgba(56,232,255,.25)}
+.page-view .section select:focus{outline:none;border-color:var(--neo-cyan);box-shadow:0 0 0 3px rgba(56,232,255,.18)}
+@media(max-width:650px){#page-checks .grid,#page-traffic .grid,#page-capacity .grid,#page-cost .grid{grid-template-columns:1fr}}
+</style>
 </head>
 <body>
 <aside class="glass-sidebar">
@@ -508,6 +594,16 @@ tbody tr:hover{background:linear-gradient(90deg,rgba(56,232,255,.12),rgba(139,12
  <a class="side-link" href="#pods" data-page="pods" onclick="navigateTo('pods');return false"><span class="ico">◈</span>Pods</a>
  <a class="side-link" href="#logs" data-page="logs" onclick="navigateTo('logs');return false"><span class="ico">≋</span>Logs</a>
  <a class="side-link" href="#rca" data-page="rca" onclick="navigateTo('rca');return false"><span class="ico">✧</span>AI RCA</a>
+ <div class="side-label">MANAGEMENT</div>
+ <a class="side-link" href="#topology" data-page="topology" onclick="navigateTo('topology');return false"><span class="ico">⌘</span>Topology</a>
+ <a class="side-link" href="#applications" data-page="applications" onclick="navigateTo('applications');return false"><span class="ico">▣</span>Applications</a>
+ <a class="side-link" href="#timeline" data-page="timeline" onclick="navigateTo('timeline');return false"><span class="ico">◷</span>Timeline</a>
+ <a class="side-link" href="#traffic" data-page="traffic" onclick="navigateTo('traffic');return false"><span class="ico">⌁</span>Live Traffic</a>
+ <a class="side-link" href="#helm" data-page="helm" onclick="navigateTo('helm');return false"><span class="ico">⬡</span>Helm</a>
+ <a class="side-link" href="#gitops" data-page="gitops" onclick="navigateTo('gitops');return false"><span class="ico">⑂</span>GitOps</a>
+ <a class="side-link" href="#checks" data-page="checks" onclick="navigateTo('checks');return false"><span class="ico">✓</span>Checks</a>
+ <a class="side-link" href="#capacity" data-page="capacity" onclick="navigateTo('capacity');return false"><span class="ico">◴</span>Capacity</a>
+ <a class="side-link" href="#cost" data-page="cost" onclick="navigateTo('cost');return false"><span class="ico">＄</span>Cost</a>
  <div style="flex:1"></div>
  <div class="side-label">SYSTEM</div>
  <div class="side-link" style="cursor:default;opacity:.75"><span class="ico">⚙</span>Preferences</div>
@@ -624,6 +720,50 @@ tbody tr:hover{background:linear-gradient(90deg,rgba(56,232,255,.12),rgba(139,12
  </div>
  <div class="section"><h2>Investigation history</h2><span>Choose an incident to inspect the full RCA</span></div>
  <div class="card tablewrap"><table><thead><tr><th>SEVERITY</th><th>RESOURCE</th><th>SUMMARY</th><th>RCA STATUS</th><th>CONFIDENCE</th><th>EMAIL</th><th>DETAILS</th></tr></thead><tbody id="rca-rows"><tr><td colspan="7" class="empty">Loading investigations…</td></tr></tbody></table></div>
+</section>
+<section class="page-view" id="page-topology" data-page="topology" hidden>
+ <div class="page-heading"><div><div class="eyebrow">CLUSTER MAP</div><h2>Topology</h2><p>Namespace resource groups and Service-to-Pod selector relationships. Read-only inventory.</p></div><span class="page-chip">AUTO REFRESH</span></div>
+ <div class="section"><h2>Resource topology</h2><select id="topology-ns" onchange="loadTopology()"><option value="">All namespaces</option></select></div>
+ <div class="grid" id="topology-summary"></div><div class="topology-grid" id="topology-groups"></div>
+ <div class="section"><h2>Service relationships</h2><span>Selector matches from current pod labels</span></div><div class="card tablewrap"><table><thead><tr><th>NAMESPACE</th><th>SERVICE</th><th>RELATION</th><th>POD</th></tr></thead><tbody id="topology-edges"></tbody></table></div>
+</section>
+<section class="page-view" id="page-applications" data-page="applications" hidden>
+ <div class="page-heading"><div><div class="eyebrow">APPLICATION INVENTORY</div><h2>Applications</h2><p>Application groups inferred from Kubernetes workload labels.</p></div><span class="page-chip">READ ONLY</span></div>
+ <div class="section"><h2>Application workloads</h2><select id="apps-ns" onchange="loadApplications()"><option value="">All namespaces</option></select></div>
+ <div class="card tablewrap"><table><thead><tr><th>NAMESPACE</th><th>APPLICATION</th><th>WORKLOADS</th><th>PODS</th><th>READY</th><th>DESIRED</th><th>HEALTH</th></tr></thead><tbody id="apps-rows"></tbody></table></div>
+</section>
+<section class="page-view" id="page-timeline" data-page="timeline" hidden>
+ <div class="page-heading"><div><div class="eyebrow">EVENT STREAM</div><h2>Timeline</h2><p>Chronological Kubernetes events, warnings and resource changes.</p></div><span class="page-chip">KUBERNETES EVENTS</span></div>
+ <div class="section"><h2>Cluster events</h2><select id="timeline-ns" onchange="loadTimeline()"><option value="">All namespaces</option></select><select id="timeline-limit" onchange="loadTimeline()"><option>100</option><option selected>200</option><option>500</option></select></div>
+ <div class="timeline-list" id="timeline-list"></div>
+</section>
+<section class="page-view" id="page-traffic" data-page="traffic" hidden>
+ <div class="page-heading"><div><div class="eyebrow">NETWORK OBSERVABILITY</div><h2>Live Traffic</h2><p>Pod network receive and transmit rates from Prometheus, when available.</p></div><span class="page-chip">METRICS-DEPENDENT</span></div>
+ <div class="grid"><div class="card"><div class="metric-head"><span>RECEIVE RATE</span><span>RX</span></div><div class="metric cyan" id="traffic-rx">—</div><div class="sub">Bytes per second across observed pods</div></div><div class="card"><div class="metric-head"><span>TRANSMIT RATE</span><span>TX</span></div><div class="metric blue" id="traffic-tx">—</div><div class="sub">Bytes per second across observed pods</div></div></div>
+ <div class="section"><h2>Pod network rates</h2><span id="traffic-note">Waiting for Prometheus</span></div><div class="card tablewrap"><table><thead><tr><th>NAMESPACE</th><th>POD</th><th>RECEIVE / SEC</th><th>TRANSMIT / SEC</th></tr></thead><tbody id="traffic-rows"></tbody></table></div>
+</section>
+<section class="page-view" id="page-helm" data-page="helm" hidden>
+ <div class="page-heading"><div><div class="eyebrow">PACKAGE MANAGEMENT</div><h2>Helm</h2><p>Read-only Flux HelmRelease inventory. Native Helm release Secrets are not accessed.</p></div><span class="page-chip">NO MUTATIONS</span></div>
+ <div class="notice" id="helm-note">Checking for Flux HelmRelease resources…</div><div class="card tablewrap"><table><thead><tr><th>NAMESPACE</th><th>RELEASE</th><th>CHART</th><th>VERSION</th><th>READY</th></tr></thead><tbody id="helm-rows"></tbody></table></div>
+</section>
+<section class="page-view" id="page-gitops" data-page="gitops" hidden>
+ <div class="page-heading"><div><div class="eyebrow">CONTINUOUS DELIVERY</div><h2>GitOps</h2><p>Read-only Argo CD and Flux reconciliation status.</p></div><span class="page-chip">NO SYNC ACTIONS</span></div>
+ <div class="notice" id="gitops-note">Discovering supported GitOps resources…</div><div class="card tablewrap"><table><thead><tr><th>PROVIDER</th><th>NAMESPACE</th><th>RESOURCE</th><th>READY</th><th>REVISION</th><th>DETAIL</th></tr></thead><tbody id="gitops-rows"></tbody></table></div>
+</section>
+<section class="page-view" id="page-checks" data-page="checks" hidden>
+ <div class="page-heading"><div><div class="eyebrow">POLICY & HEALTH</div><h2>Checks</h2><p>Read-only health checks derived from node conditions, pod states and deployment readiness.</p></div><span class="page-chip">AUTOMATED</span></div>
+ <div class="grid"><div class="card"><div class="metric-head"><span>PASS</span></div><div class="metric green" id="checks-pass">—</div></div><div class="card"><div class="metric-head"><span>WARN</span></div><div class="metric amber" id="checks-warn">—</div></div><div class="card"><div class="metric-head"><span>FAIL</span></div><div class="metric red" id="checks-fail">—</div></div></div>
+ <div class="card tablewrap"><table><thead><tr><th>STATUS</th><th>SCOPE</th><th>RESOURCE</th><th>CHECK</th><th>DETAIL</th></tr></thead><tbody id="checks-rows"></tbody></table></div>
+</section>
+<section class="page-view" id="page-capacity" data-page="capacity" hidden>
+ <div class="page-heading"><div><div class="eyebrow">RESOURCE PLANNING</div><h2>Capacity</h2><p>Cluster allocatable CPU and memory compared with scheduled workload requests.</p></div><span class="page-chip">REQUESTS VS ALLOCATABLE</span></div>
+ <div class="grid"><div class="card"><div class="metric-head"><span>CPU REQUESTED</span></div><div class="metric cyan" id="capacity-cpu">—</div><div class="sub" id="capacity-cpu-sub">Millicores</div><div class="meter"><i id="capacity-cpu-bar"></i></div></div><div class="card"><div class="metric-head"><span>MEMORY REQUESTED</span></div><div class="metric blue" id="capacity-mem">—</div><div class="sub" id="capacity-mem-sub">Bytes</div><div class="meter blue-meter"><i id="capacity-mem-bar"></i></div></div></div>
+ <div class="notice" id="capacity-note"></div>
+</section>
+<section class="page-view" id="page-cost" data-page="cost" hidden>
+ <div class="page-heading"><div><div class="eyebrow">RESOURCE ECONOMICS</div><h2>Cost</h2><p>Resource consumption indicators. Monetary estimates require an explicitly configured pricing model.</p></div><span class="page-chip">NO FABRICATED PRICES</span></div>
+ <div class="card cost-card"><div class="visual-kicker">ESTIMATED MONTHLY COST</div><div class="metric" id="cost-value">Not configured</div><p id="cost-note">No pricing model configured. Resource requests are shown below without converting them into currency.</p></div>
+ <div class="grid"><div class="card"><div class="metric-head"><span>CPU REQUESTED</span></div><div class="metric cyan" id="cost-cpu">—</div></div><div class="card"><div class="metric-head"><span>MEMORY REQUESTED</span></div><div class="metric blue" id="cost-mem">—</div></div></div>
 </section>
 <div id="incident-drawer" class="drawer-backdrop" onclick="if(event.target===this)closeIncident()">
  <section class="drawer">
@@ -923,9 +1063,24 @@ function applyTheme(mode){
 function setTheme(mode){$('themeMode').value=mode;try{localStorage.setItem('clusterpulse-theme',mode)}catch(e){}applyTheme(mode)}
 (function initTheme(){let mode='system';try{mode=localStorage.getItem('clusterpulse-theme')||'system'}catch(e){}$('themeMode').value=mode;applyTheme(mode);const mq=window.matchMedia('(prefers-color-scheme: light)');mq.addEventListener?.('change',()=>{if($('themeMode').value==='system')applyTheme('system')})})();
 
+
+const nsSelectors=['topology-ns','apps-ns','timeline-ns'];
+async function populateNamespaces(){try{const rows=await api('/api/namespaces');nsSelectors.forEach(id=>{const el=$(id);if(!el)return;const val=el.value;el.innerHTML='<option value="">All namespaces</option>'+rows.map(x=>`<option value="${esc(x.name)}">${esc(x.name)}</option>`).join('');el.value=val})}catch(e){console.warn('Namespace list unavailable',e)}}
+async function loadTopology(){const d=await api('/api/topology'+($('topology-ns').value?'?namespace='+encodeURIComponent($('topology-ns').value):''));$('topology-summary').innerHTML=Object.entries(d.totals).map(([k,v])=>`<div class="card"><div class="metric-head"><span>${esc(k.toUpperCase())}</span></div><div class="metric cyan">${v}</div></div>`).join('');$('topology-groups').innerHTML=d.namespaces.map(n=>`<div class="topology-ns-card"><h3>⬡ ${esc(n.namespace)} <small>· ${n.resources} resources</small></h3><div class="topology-counts">${['deployments','services','pods','ingresses','pvcs'].map(k=>`<span>${n[k]} ${k}</span>`).join('')}</div></div>`).join('')||'<div class="notice">No namespaces found.</div>';$('topology-edges').innerHTML=d.edges.map(e=>`<tr><td>${esc(e.namespace)}</td><td>${esc(e.from)}</td><td>${esc(e.type)}</td><td>${esc(e.to)}</td></tr>`).join('')||'<tr><td colspan="4" class="empty">No Service selector matches found.</td></tr>'}
+async function loadApplications(){const ns=$('apps-ns').value;const d=await api('/api/applications'+(ns?'?namespace='+encodeURIComponent(ns):''));$('apps-rows').innerHTML=d.map(a=>`<tr><td>${esc(a.namespace)}</td><td><b>${esc(a.name)}</b></td><td>${a.workloads.map(w=>esc(w.kind)+': '+esc(w.name)).join('<br>')}</td><td>${a.pods}</td><td>${a.ready}</td><td>${a.desired}</td><td>${badge(a.ready>=a.desired,'Healthy','Degraded')}</td></tr>`).join('')||'<tr><td colspan="7" class="empty">No labeled Deployment or StatefulSet applications found.</td></tr>'}
+async function loadTimeline(){const ns=$('timeline-ns').value,limit=$('timeline-limit').value;const d=await api('/api/timeline?limit='+limit+(ns?'&namespace='+encodeURIComponent(ns):''));$('timeline-list').innerHTML=d.map(e=>`<div class="timeline-event"><time>${e.time?new Date(e.time).toLocaleString():'Time unavailable'}</time><b class="${e.type==='Warning'?'status-fail':'status-pass'}">${esc(e.type)}</b><div><b>${esc(e.reason)}</b><div class="visual-note">${esc(e.namespace)} · ${esc(e.object)} · x${e.count}</div></div><p>${esc(e.message)}</p></div>`).join('')||'<div class="notice">No Kubernetes events returned.</div>'}
+function humanRate(n){if(n==null)return '—';const units=['B/s','KB/s','MB/s','GB/s'];let i=0;while(n>=1024&&i<3){n/=1024;i++}return n.toFixed(1)+' '+units[i]}
+async function loadTraffic(){const d=await api('/api/traffic');if(!d.configured){$('traffic-note').textContent=d.note;$('traffic-rows').innerHTML='<tr><td colspan="4" class="empty">Prometheus network metrics are not configured.</td></tr>';return}const rx=d.receive_bytes_per_second||[],tx=d.transmit_bytes_per_second||[],m={};rx.forEach(x=>{const k=(x.metric.namespace||'')+'/'+(x.metric.pod||'');m[k]=m[k]||{rx:0,tx:0};m[k].rx=x.value});tx.forEach(x=>{const k=(x.metric.namespace||'')+'/'+(x.metric.pod||'');m[k]=m[k]||{rx:0,tx:0};m[k].tx=x.value});$('traffic-rx').textContent=humanRate(rx.reduce((a,x)=>a+x.value,0));$('traffic-tx').textContent=humanRate(tx.reduce((a,x)=>a+x.value,0));$('traffic-note').textContent='Prometheus sample · refreshed with dashboard polling';$('traffic-rows').innerHTML=Object.entries(m).map(([k,v])=>`<tr><td>${esc(k.split('/')[0])}</td><td>${esc(k.split('/').slice(1).join('/'))}</td><td>${humanRate(v.rx)}</td><td>${humanRate(v.tx)}</td></tr>`).join('')||'<tr><td colspan="4" class="empty">No network series returned. Ensure cAdvisor exports container network metrics.</td></tr>'}
+async function loadHelm(){const d=await api('/api/helm');$('helm-note').textContent=d.note||'Flux HelmRelease resources are visible below. Native Helm releases are not queried.';$('helm-rows').innerHTML=d.items.map(x=>`<tr><td>${esc(x.namespace)}</td><td>${esc(x.name)}</td><td>${esc(x.chart||'—')}</td><td>${esc(x.version||'—')}</td><td>${badge(x.ready)}</td></tr>`).join('')||'<tr><td colspan="5" class="empty">No Flux HelmRelease objects found.</td></tr>'}
+async function loadGitops(){const d=await api('/api/gitops');$('gitops-note').textContent=d.note||'Discovered supported GitOps resources.';$('gitops-rows').innerHTML=d.items.map(x=>`<tr><td>${esc(x.provider)}</td><td>${esc(x.namespace)}</td><td>${esc(x.name)}</td><td>${x.ready==null?'Unknown':badge(x.ready)}</td><td>${esc(x.revision||'—')}</td><td>${esc(x.message||x.reason||'—')}</td></tr>`).join('')||'<tr><td colspan="6" class="empty">No supported GitOps resources found.</td></tr>'}
+async function loadChecks(){const d=await api('/api/checks');$('checks-pass').textContent=d.summary.PASS;$('checks-warn').textContent=d.summary.WARN;$('checks-fail').textContent=d.summary.FAIL;$('checks-rows').innerHTML=d.checks.map(x=>`<tr><td class="status-${x.status.toLowerCase()}">${x.status}</td><td>${esc(x.scope)}</td><td>${esc(x.resource)}</td><td>${esc(x.check)}</td><td>${esc(x.message)}</td></tr>`).join('')||'<tr><td colspan="5" class="empty">No check results.</td></tr>'}
+function fmtBytes(n){if(n==null)return '—';const u=['B','KiB','MiB','GiB','TiB'];let i=0;while(n>=1024&&i<4){n/=1024;i++}return n.toFixed(1)+' '+u[i]}
+async function loadCapacity(){const d=await api('/api/capacity');$('capacity-cpu').textContent=d.cpu_millicores.requested.toLocaleString()+' mCPU';$('capacity-cpu-sub').textContent=`of ${d.cpu_millicores.allocatable.toLocaleString()} mCPU allocatable · ${d.cpu_millicores.pct??'—'}% requested`;$('capacity-cpu-bar').style.width=(d.cpu_millicores.pct||0)+'%';$('capacity-mem').textContent=fmtBytes(d.memory_bytes.requested);$('capacity-mem-sub').textContent=`of ${fmtBytes(d.memory_bytes.allocatable)} allocatable · ${d.memory_bytes.pct??'—'}% requested`;$('capacity-mem-bar').style.width=(d.memory_bytes.pct||0)+'%';$('capacity-note').textContent=d.note+' These figures represent requests, not real-time usage.'}
+async function loadCost(){const d=await api('/api/cost');$('cost-value').textContent=d.pricing_configured?'Pricing model configured':'Not configured';$('cost-note').textContent=d.note;$('cost-cpu').textContent=d.cpu_requested_millicores.toLocaleString()+' mCPU';$('cost-mem').textContent=fmtBytes(d.memory_requested_bytes)}
+
 let currentPage='overview';
 function navigateTo(page){
- const allowed=['overview','incidents','nodes','workloads','pods','logs','rca'];
+ const allowed=['overview','incidents','nodes','workloads','pods','logs','rca','topology','applications','timeline','traffic','helm','gitops','checks','capacity','cost'];
  if(!allowed.includes(page))page='overview';
  currentPage=page;
  document.querySelectorAll('.page-view').forEach(v=>{v.hidden=v.dataset.page!==page});
@@ -942,6 +1097,15 @@ async function refreshCurrentPage(){
   else if(currentPage==='pods'){await loadPods();}
   else if(currentPage==='logs'){await loadLogsPage();}
   else if(currentPage==='rca'){await loadIncidents();renderRcaDashboard();}
+  else if(currentPage==='topology'){await populateNamespaces();await loadTopology();}
+  else if(currentPage==='applications'){await populateNamespaces();await loadApplications();}
+  else if(currentPage==='timeline'){await populateNamespaces();await loadTimeline();}
+  else if(currentPage==='traffic'){await loadTraffic();}
+  else if(currentPage==='helm'){await loadHelm();}
+  else if(currentPage==='gitops'){await loadGitops();}
+  else if(currentPage==='checks'){await loadChecks();}
+  else if(currentPage==='capacity'){await loadCapacity();}
+  else if(currentPage==='cost'){await loadCost();}
   $('footertime').textContent=new Date().toLocaleString();
  }catch(e){$('connection').textContent='API error';console.error(e)}
 }
