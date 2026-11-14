@@ -26,17 +26,221 @@ body[data-theme="light"] .logbox{background:#172338;color:#d6fbe7}
 .smallbtn{padding:6px 9px;font-size:11px}
 .toolbar input{background:var(--panel2);border:1px solid var(--line);color:var(--text);padding:9px 11px;border-radius:9px;min-width:190px}
 @media(max-width:650px){.toolbar input{min-width:100%}}
-</style></head>
-<body><div class="wrap">
+
+:root {
+ --glass:rgba(17,29,49,.68);
+ --glass-border:rgba(151,190,230,.17);
+ --glass-blur:blur(18px);
+ --accent:#69dff2;
+}
+body {
+ background:
+ radial-gradient(ellipse at 15% 5%,#183d63 0,transparent 42%),
+ radial-gradient(ellipse at 90% 90%,#29265a 0,transparent 38%),
+ #070d19;
+}
+.wrap {max-width:none;margin-left:248px;padding:28px 32px}
+.glass-sidebar {
+ position:fixed;inset:0 auto 0 0;width:224px;padding:25px 15px;
+ background:rgba(8,17,32,.78);backdrop-filter:blur(24px);
+ border-right:1px solid var(--glass-border);z-index:20;
+ display:flex;flex-direction:column;gap:9px;
+}
+.side-brand {font-size:18px;font-weight:800;padding:8px 10px 25px}
+.side-label {font-size:10px;letter-spacing:1.5px;color:#7187a5;padding:15px 12px 5px}
+.side-link {
+ display:flex;align-items:center;gap:12px;padding:12px 13px;
+ border:1px solid transparent;border-radius:12px;color:#a9bad0;
+ text-decoration:none;font-size:13px;cursor:pointer;background:transparent;
+}
+.side-link:hover,.side-link.active {
+ color:#eafaff;background:rgba(89,190,224,.12);
+ border-color:rgba(105,223,242,.22);
+}
+.side-link .ico {width:20px;text-align:center;color:var(--accent)}
+.card {
+ background:linear-gradient(135deg,rgba(25,44,69,.75),rgba(13,25,43,.67));
+ border:1px solid var(--glass-border);backdrop-filter:var(--glass-blur);
+ box-shadow:0 14px 40px rgba(0,0,0,.18);
+}
+.metric-tile {cursor:pointer;transition:transform .2s,border-color .2s}
+.metric-tile:hover {transform:translateY(-3px);border-color:rgba(105,223,242,.55)}
+.severity-grid {display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:13px}
+.severity-card {cursor:pointer;transition:.2s;position:relative;overflow:hidden}
+.severity-card:hover,.severity-card.selected {transform:translateY(-2px);border-color:var(--accent)}
+.severity-card strong {font-size:29px;display:block;margin:10px 0 3px}
+.severity-card small {color:var(--muted)}
+.severity-card.CRITICAL {border-left:3px solid #ff526d}
+.severity-card.HIGH {border-left:3px solid #ff8a67}
+.severity-card.MEDIUM {border-left:3px solid #ffc36a}
+.severity-card.LOW {border-left:3px solid #5ed6e8}
+.incident-row {cursor:pointer}
+.incident-row:hover {background:rgba(91,183,220,.09)}
+.drawer-backdrop {
+ display:none;position:fixed;inset:0;background:rgba(1,6,15,.65);
+ backdrop-filter:blur(5px);z-index:40
+}
+.drawer {
+ position:fixed;right:0;top:0;height:100dvh;width:min(680px,94vw);
+ overflow:auto;padding:27px;background:rgba(11,22,39,.96);
+ border-left:1px solid var(--glass-border);backdrop-filter:blur(25px);
+ box-shadow:-20px 0 70px #0007;
+}
+.drawer-backdrop.open {display:block}
+.drawer-head {display:flex;justify-content:space-between;align-items:center;gap:12px}
+.drawer h2 {font-size:20px}
+.rca-block {padding:16px;margin:13px 0;border:1px solid var(--glass-border);
+ border-radius:13px;background:rgba(35,55,80,.28)}
+.rca-block h3 {font-size:12px;color:var(--accent);letter-spacing:.8px;margin:0 0 10px}
+.rca-block p,.rca-block li {font-size:13px;line-height:1.65;color:#c4d3e6}
+.drawer-close {font-size:20px;padding:5px 12px}
+@media(max-width:950px) {
+ .wrap {margin-left:0;padding:18px}
+ .glass-sidebar {width:68px;padding:18px 8px}
+ .side-brand {font-size:0;padding:8px 4px 20px}
+ .side-brand:after {content:"✦";font-size:23px}
+ .side-link {justify-content:center;padding:13px 4px;font-size:0}
+ .side-link .ico {font-size:17px}
+ .side-label {font-size:0;padding:5px}
+}
+@media(max-width:560px) {
+ .wrap {padding:12px;margin-left:0}
+ .glass-sidebar {width:54px}
+ .severity-grid {grid-template-columns:repeat(2,minmax(0,1fr))}
+ .top {margin-left:48px}
+}
+
+
+/* Independent dashboard pages */
+.page-view[hidden]{display:none!important}
+.page-view{animation:pageIn .22s ease both;min-height:calc(100vh - 170px)}
+@keyframes pageIn{from{opacity:.55;transform:translateY(5px)}to{opacity:1;transform:none}}
+.page-heading{display:flex;justify-content:space-between;align-items:center;gap:18px;margin:4px 0 24px;padding:22px 24px;border:1px solid var(--glass-border);border-radius:18px;background:linear-gradient(120deg,rgba(31,62,91,.62),rgba(17,29,49,.4));backdrop-filter:var(--glass-blur)}
+.page-heading h2{font-size:25px;letter-spacing:-.6px;margin:5px 0 6px}.page-heading p{color:var(--muted);margin:0;font-size:12px}.eyebrow{font-size:10px;letter-spacing:1.8px;color:var(--accent);font-weight:750}.page-chip{font-size:10px;letter-spacing:1px;color:var(--accent);border:1px solid var(--glass-border);border-radius:20px;padding:8px 11px;white-space:nowrap}
+.page-view .section:first-of-type{margin-top:22px}.rca-summary-grid{margin-bottom:20px}
+#page-incidents .severity-grid{margin:18px 0 24px}#page-incidents .section{margin-top:28px}
+#page-overview .grid{margin-bottom:22px}#page-overview .two,#page-overview .three{margin-bottom:20px}
+#page-nodes .tablewrap,#page-workloads .tablewrap,#page-pods .tablewrap,#page-logs .card,#page-rca .tablewrap{margin-bottom:20px}
+@media(max-width:950px){.page-heading{padding:17px}.page-heading h2{font-size:21px}}
+@media(max-width:560px){.page-heading{align-items:flex-start;flex-direction:column;margin-left:48px}.page-chip{display:none}.rca-summary-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+
+
+/* ClusterPulse premium glass dashboards: distinct page compositions */
+:root{--glass-bg:rgba(8,20,36,.64);--glass-line:rgba(112,202,230,.20);--glass-glow:0 18px 55px rgba(0,0,0,.25)}
+body{background:radial-gradient(ellipse at 12% 8%,rgba(15,104,130,.22),transparent 38%),radial-gradient(ellipse at 88% 78%,rgba(57,48,132,.20),transparent 36%),#050b15}
+.page-view .card,.glass-panel{background:linear-gradient(145deg,rgba(16,39,61,.78),rgba(7,19,34,.72));border:1px solid var(--glass-line);border-radius:17px;backdrop-filter:blur(22px);box-shadow:var(--glass-glow)}
+.page-view .page-heading{background:linear-gradient(110deg,rgba(9,76,91,.38),rgba(15,28,52,.62));border-color:var(--glass-line);box-shadow:0 14px 45px rgba(0,0,0,.18)}
+.page-view h3{font-size:15px;margin:6px 0 0;color:#e8f6ff}.visual-kicker{font-size:9px;letter-spacing:1.7px;color:#70dff0;font-weight:800}.visual-head{display:flex;justify-content:space-between;align-items:center;gap:12px}.live-pill{font-size:8px;letter-spacing:1px;color:#71e4bf;border:1px solid rgba(81,214,162,.28);border-radius:30px;padding:6px 9px}.visual-note{font-size:10px;color:#849ab4;line-height:1.5;margin:12px 0 0}.ops-hero{display:grid;grid-template-columns:1fr 2fr 1fr;gap:14px;margin:16px 0}.ops-health,.ops-chart,.ops-side{padding:18px;min-height:220px}.gauge{width:150px;height:150px;border-radius:50%;margin:10px auto;background:conic-gradient(#56dfb0 0 72%,#20364b 72% 100%);display:grid;place-items:center;position:relative}.gauge:before{content:"";position:absolute;inset:9px;border-radius:50%;background:#0a1728}.gauge-inner{z-index:1;text-align:center;display:flex;flex-direction:column}.gauge-inner strong{font-size:29px;color:#75e9ca}.gauge-inner span{font-size:8px;letter-spacing:1px;color:#90a8c0}.health-foot{font-size:10px;color:#8ea4bc;text-align:center}.live-dot{display:inline-block;width:6px;height:6px;border-radius:50%;background:#51d6a2;box-shadow:0 0 10px #51d6a2;margin-right:6px}.resource-pair{display:grid;grid-template-columns:1fr 1fr;gap:22px;margin-top:20px}.resource-pair span,.fleet-row span{font-size:10px;color:#91a7bf}.resource-pair strong{display:block;font-size:25px;margin:4px 0 8px;color:#65ddec}.meter{height:6px;background:#1c334a;border-radius:10px;overflow:hidden}.meter i{display:block;height:100%;width:0;background:linear-gradient(90deg,#42d8c6,#54d8ed);border-radius:10px}.blue-meter i{background:linear-gradient(90deg,#4b9fff,#8c8aff)}.sparkline{width:100%;height:62px;margin-top:12px;overflow:visible}.sparkline path:first-child{fill:none;stroke:#54dce7;stroke-width:2}.sparkline-fill{fill:rgba(53,198,210,.10);stroke:none}.chart-foot{display:flex;justify-content:space-between;font-size:8px;color:#7790aa;letter-spacing:.6px}.fleet-number{font-size:42px;font-weight:800;color:#65dfd6;margin-top:18px}.ops-side>span{font-size:10px;color:#8299b3}.fleet-divider{height:1px;background:var(--glass-line);margin:14px 0}.fleet-row{display:flex;justify-content:space-between;padding:5px 0}.fleet-row b{font-size:12px}.danger-text{color:#ff7185}.warn-text{color:#ffc36a}.deploy-value{font-size:23px;color:#72e4bd;margin-top:7px}.overview-lower{display:grid;grid-template-columns:1.7fr 1fr;gap:14px}.topology-panel,.health-list{padding:18px}.topology-art{height:190px;position:relative;display:flex;align-items:center;justify-content:center}.topology-art svg{position:absolute;inset:0;width:100%;height:100%}.topology-art svg path{fill:none;stroke:#3dbbdb;stroke-width:1.2;stroke-dasharray:5 5;opacity:.7}.topo-core,.topo-node{z-index:1;position:absolute;border:1px solid #4bd4e4;background:rgba(16,79,103,.62);box-shadow:0 0 24px rgba(45,202,224,.18);border-radius:12px;padding:12px 15px;text-align:center;font-size:10px}.topo-core{left:42%;top:36%;color:#80f2ec}.topo-core small{font-size:7px}.n1{left:12%;top:8%}.n2{right:12%;top:8%}.n3{left:43%;bottom:2%;border-color:#4cbb9b}.signal-row{display:flex;align-items:center;gap:9px;padding:13px 0;border-bottom:1px solid rgba(112,202,230,.10);font-size:11px;color:#a9bdd2}.signal-row b{margin-left:auto;color:#e8f5ff;font-size:10px}.signal{width:7px;height:7px;border-radius:50%}.green-signal{background:#51d6a2;box-shadow:0 0 9px #51d6a2}.cyan-signal{background:#5ed6e8}.amber-signal{background:#ffc36a}.incident-command{display:grid;grid-template-columns:1fr 2fr 1fr;gap:14px;margin:16px 0}.incident-score,.incident-visual,.incident-flow{padding:18px}.incident-ring{width:130px;height:130px;border-radius:50%;border:9px solid #244056;border-top-color:#ff6d83;border-right-color:#ffc36a;display:flex;flex-direction:column;align-items:center;justify-content:center;margin:12px auto}.incident-ring strong{font-size:30px}.incident-ring span{font-size:8px;letter-spacing:1px;color:#8ea4bc}.incident-score-foot{text-align:center;font-size:9px;color:#829ab3;margin-bottom:12px}.incident-mini{display:flex;justify-content:space-between;padding:6px 2px;font-size:9px;color:#8da5bd}.incident-mini b{color:#ff8a9b}.severity-bars{display:grid;gap:16px;margin:22px 0}.severity-bars>div{display:grid;grid-template-columns:65px 1fr 22px;align-items:center;gap:9px;font-size:9px;color:#93a9c0}.severity-bars i{height:8px;border-radius:10px;background:#1b3148;overflow:hidden}.severity-bars i b{display:block;height:100%;width:0;background:linear-gradient(90deg,#f56d83,#ffb26b);border-radius:10px}.severity-bars>div:nth-child(3) i b{background:linear-gradient(90deg,#f4ba60,#ffe08b)}.severity-bars>div:nth-child(4) i b{background:linear-gradient(90deg,#43bcd4,#7be7ef)}.severity-bars strong{color:#e9f7ff}.flow-step{display:grid;grid-template-columns:25px 1fr;gap:5px;padding:11px 0;border-bottom:1px solid rgba(112,202,230,.12);font-size:10px;color:#c4d5e6}.flow-step i{grid-row:span 2;color:#66dce8;font-style:normal}.flow-step b{font-size:8px;color:#829ab2;font-weight:500}.fleet-hero,.workload-hero,.pod-hero,.logs-hero{padding:22px;margin:16px 0;display:flex;align-items:center;justify-content:space-between;gap:20px;min-height:145px}.fleet-hero p,.workload-hero p,.pod-hero p,.logs-hero p,.rca-focus p{font-size:11px;color:#8fa6bf}.fleet-big{display:flex;flex-direction:column;text-align:center}.fleet-big strong{font-size:42px;color:#67e0d0}.fleet-big span{font-size:8px;letter-spacing:1px;color:#8299b1}.fleet-status{font-size:10px;color:#9ab0c7}.node-visual-grid{display:grid;grid-template-columns:1.4fr 1fr;gap:14px}.node-map,.node-condition{padding:20px}.node-orbit{height:220px;position:relative;display:grid;place-items:center}.orbit-ring{width:180px;height:180px;border:1px dashed #3c9db9;border-radius:50%;box-shadow:0 0 35px rgba(45,202,224,.08)}.orbit-core,.work-orbit-core{position:absolute;display:grid;place-items:center;width:62px;height:62px;border-radius:50%;background:rgba(37,151,170,.25);border:1px solid #4bd6dc;color:#9df5ec;font-weight:800}.orbit-chip{position:absolute;border:1px solid #4d9db5;border-radius:10px;padding:9px 12px;background:rgba(12,43,62,.9);font-size:9px;color:#bdeaf0}.orbit-a{top:8px;left:calc(50% - 36px)}.orbit-b{bottom:8px;left:calc(50% - 36px)}.orbit-c{right:calc(50% - 125px);top:calc(50% - 15px)}.condition-line{display:flex;justify-content:space-between;padding:18px 0;border-bottom:1px solid var(--glass-line);font-size:10px;color:#a7bad0}.condition-line b{color:#74ddc3}.workload-hero{min-height:190px}.workload-orbit{width:260px;height:150px;position:relative;display:grid;place-items:center}.work-orbit-core{width:65px;height:65px}.work-pill.wp4{left:50%;top:50%;transform:translate(-50%,105px)}.work-pill{position:absolute;font-size:8px;border:1px solid var(--glass-line);padding:7px 9px;border-radius:18px;color:#a8eaf0;background:rgba(22,66,86,.45)}.wp1{top:0;left:0}.wp2{right:0;top:15px}.wp3{bottom:0;left:30%}.workload-kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin:14px 0}.workload-kpis .glass-panel{padding:18px}.workload-kpis span,.workload-kpis small{display:block;font-size:9px;color:#8fa5bd}.workload-kpis b{display:block;font-size:30px;color:#6de0d5;margin:8px 0}.pod-status-rings{display:flex;gap:12px}.pod-ring{width:85px;height:85px;border-radius:50%;border:5px solid #43c9a4;display:flex;flex-direction:column;align-items:center;justify-content:center}.pod-ring b{font-size:20px}.pod-ring span{font-size:7px;color:#8fa7be}.ring-warn{border-color:#ffc36a}.ring-bad{border-color:#ff7185}.pod-activity{padding:18px;margin:14px 0}.pod-state-track{height:13px;display:flex;border-radius:20px;overflow:hidden;background:#1b3046;margin:20px 0 10px}.pod-state-track i{display:block;width:0}.state-running{background:#51d6a2}.state-pending{background:#ffc36a}.state-failed{background:#ff7185}.pod-state-legend{display:flex;gap:18px;font-size:9px;color:#a0b4c9}.logs-hero{display:block}.log-feature-row{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:22px}.log-feature-row>div{padding:13px;border:1px solid var(--glass-line);border-radius:12px;background:rgba(20,49,72,.38)}.log-feature-row b,.log-feature-row span{display:block}.log-feature-row b{font-size:9px;color:#6ce0db}.log-feature-row span{font-size:9px;color:#91a8c0;margin-top:5px}.rca-workspace{display:grid;grid-template-columns:2fr 1fr;gap:14px;margin:16px 0}.rca-focus,.rca-side{padding:20px}.rca-flow{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-top:25px}.rca-flow span{border:1px solid var(--glass-line);border-radius:9px;padding:9px 12px;color:#9de8ec;font-size:8px;letter-spacing:.7px;background:rgba(20,62,80,.4)}.rca-flow i{color:#4bd2d9;font-style:normal}.rca-coverage{width:115px;height:115px;border-radius:50%;border:7px solid #4bd3c2;border-right-color:#243e55;display:flex;flex-direction:column;align-items:center;justify-content:center;margin:14px auto}.rca-coverage strong{font-size:27px;color:#70e7d5}.rca-coverage span{font-size:7px;color:#91a9c1;letter-spacing:1px}
+@media(max-width:1100px){.ops-hero,.incident-command{grid-template-columns:1fr 1fr}.ops-chart,.incident-visual{grid-column:span 2}.overview-lower{grid-template-columns:1fr}.node-visual-grid{grid-template-columns:1fr}}
+@media(max-width:650px){.ops-hero,.incident-command{grid-template-columns:1fr}.ops-chart,.incident-visual{grid-column:auto}.fleet-hero,.workload-hero,.pod-hero{align-items:flex-start;flex-direction:column}.workload-kpis{grid-template-columns:1fr}.pod-status-rings{width:100%;justify-content:space-between}.log-feature-row{grid-template-columns:1fr}.rca-workspace{grid-template-columns:1fr}.incident-command .incident-score{min-height:220px}}
+
+
+.live-node-grid{display:flex!important;flex-wrap:wrap;align-content:center;justify-content:center;gap:12px;padding:24px;min-height:220px}
+.live-node-grid .orbit-ring,.live-node-grid .orbit-core{display:none}
+.live-node-chip{position:relative!important;inset:auto!important;display:flex;flex-direction:column;gap:5px;min-width:115px;padding:14px 18px;border:1px solid #4d9db5;border-radius:12px;background:rgba(12,43,62,.9);text-align:center;color:#bdeaf0;box-shadow:0 0 20px rgba(45,202,224,.12)}
+.live-node-chip small{font-size:8px;letter-spacing:1px;color:#74ddc3}
+.live-node-chip.node-bad{border-color:#ff7185}
+.live-node-chip.node-bad small{color:#ff7185}
+.condition-good{color:#74ddc3!important}
+
+
+/* Controller operations: aligned live inventory */
+.workload-hero {
+  min-height: 190px;
+  overflow: hidden;
+}
+.workload-orbit {
+  width: 420px;
+  min-width: 420px;
+  height: 130px;
+  display: grid;
+  grid-template-columns: 1fr 70px 1fr;
+  grid-template-rows: 1fr 1fr;
+  align-items: center;
+  justify-items: center;
+  gap: 10px;
+}
+.work-orbit-core {
+  position: static;
+  grid-column: 2;
+  grid-row: 1 / 3;
+}
+.work-pill {
+  position: static;
+  transform: none !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  white-space: nowrap;
+  min-width: 145px;
+  padding: 10px 12px;
+  font-size: 9px;
+  font-weight: 700;
+  color: #b9d3e7;
+  border-color: rgba(85, 190, 220, .35);
+  background: rgba(17, 54, 75, .72);
+}
+.work-pill.wp1 { grid-column: 1; grid-row: 1; }
+.work-pill.wp2 { grid-column: 3; grid-row: 1; }
+.work-pill.wp3 { grid-column: 1; grid-row: 2; }
+.work-pill.wp4 { grid-column: 3; grid-row: 2; }
+.work-pill b {
+  color: #5ff0df;
+  font-size: 17px;
+  font-weight: 900;
+  text-shadow: 0 0 12px rgba(65, 230, 220, .35);
+}
+@media (max-width: 900px) {
+  .workload-hero { flex-wrap: wrap; }
+  .workload-orbit { width: 100%; min-width: 0; }
+}
+
+
+/* Standalone log explorer selectors */
+#page-logs .toolbar select {
+ min-width: 145px;
+ max-width: 240px;
+}
+#page-logs #lognamespace { min-width: 175px; }
+#page-logs #logpod { min-width: 250px; }
+#page-logs .logbox {
+ min-height: 330px;
+ max-height: 560px;
+ overflow: auto;
+ white-space: pre-wrap;
+ overflow-wrap: anywhere;
+}
+\n</style></head>
+<body>
+<aside class="glass-sidebar">
+ <div class="side-brand">✦ ClusterPulse <span class="cyan">AI</span></div>
+ <div class="side-label">DASHBOARDS</div>
+ <a class="side-link active" href="#overview" data-page="overview" onclick="navigateTo('overview');return false"><span class="ico">⌂</span>Overview</a>
+ <a class="side-link" href="#incidents" data-page="incidents" onclick="navigateTo('incidents');return false"><span class="ico">⚑</span>Incidents</a>
+ <a class="side-link" href="#nodes" data-page="nodes" onclick="navigateTo('nodes');return false"><span class="ico">▦</span>Nodes</a>
+ <a class="side-link" href="#workloads" data-page="workloads" onclick="navigateTo('workloads');return false"><span class="ico">▤</span>Workloads</a>
+ <a class="side-link" href="#pods" data-page="pods" onclick="navigateTo('pods');return false"><span class="ico">◈</span>Pods</a>
+ <a class="side-link" href="#logs" data-page="logs" onclick="navigateTo('logs');return false"><span class="ico">≋</span>Logs</a>
+ <a class="side-link" href="#rca" data-page="rca" onclick="navigateTo('rca');return false"><span class="ico">✧</span>AI RCA</a>
+ <div style="flex:1"></div>
+ <div class="side-label">SYSTEM</div>
+ <div class="side-link" style="cursor:default;opacity:.75"><span class="ico">⚙</span>Preferences</div>
+</aside>
+<div class="wrap">
 <header class="top"><div class="brand"><div class="logo">✦</div><div><h1>ClusterPulse <span class="cyan">AI</span></h1><p>Kubernetes observability · intelligent incident response</p></div></div><div class="topright"><span class="pill"><i class="dot"></i><span id="connection">Connecting</span></span><div class="toolbar"><select id="themeMode" class="theme-select" aria-label="Theme" onchange="setTheme(this.value)"><option value="system">System theme</option><option value="light">Light theme</option><option value="dark">Dark theme</option></select><button onclick="loadAll()">↻ Refresh</button></div></div></header>
-<div class="grid">
-<div class="card"><div class="metric-head"><span>CLUSTER HEALTH</span><span class="green">●</span></div><div class="metric green" id="health">—</div><div class="sub" id="healthsub">Awaiting cluster data</div></div>
-<div class="card"><div class="metric-head"><span>TOTAL PODS</span><span class="cyan">◈</span></div><div class="metric" id="pods">—</div><div class="sub" id="podsub">Across monitored namespaces</div></div>
-<div class="card"><div class="metric-head"><span>UNHEALTHY PODS</span><span class="red">◆</span></div><div class="metric red" id="failed">—</div><div class="sub">Pending, failed or not ready</div></div>
-<div class="card"><div class="metric-head"><span>OPEN INCIDENTS</span><span class="amber">⚑</span></div><div class="metric amber" id="incidents">—</div><div class="sub" id="incsub">AI investigation records</div></div>
+<section class="page-view" id="page-overview" data-page="overview">
+ <div class="page-heading"><div><div class="eyebrow">CLUSTERPULSE AI</div><h2>Cluster overview</h2><p>Cluster posture, resource utilization, and workload health at a glance.</p></div><span class="page-chip">LIVE MONITORING</span></div>
+<div class="ops-hero"><div class="ops-health glass-panel"><div class="visual-kicker">CLUSTER POSTURE</div><div class="gauge" id="overview-gauge"><div class="gauge-inner"><strong id="ov-health">—</strong><span>HEALTH SCORE</span></div></div><div class="health-foot"><span class="live-dot"></span><span id="ov-health-caption">Waiting for cluster telemetry</span></div></div><div class="ops-chart glass-panel"><div class="visual-head"><div><div class="visual-kicker">RESOURCE TELEMETRY</div><h3>Compute utilization</h3></div><span class="live-pill">LIVE METRICS</span></div><div class="resource-pair"><div><span>CPU</span><strong id="ov-cpu">—</strong><div class="meter"><i id="ov-cpu-bar"></i></div></div><div><span>MEMORY</span><strong id="ov-memory">—</strong><div class="meter blue-meter"><i id="ov-memory-bar"></i></div></div></div><svg class="sparkline" viewBox="0 0 600 110" preserveAspectRatio="none" aria-label="Decorative telemetry grid"><path d="M0 88 C45 78 52 30 98 50 S160 90 205 48 S265 15 310 44 S370 90 420 48 S500 30 600 18"/><path class="sparkline-fill" d="M0 88 C45 78 52 30 98 50 S160 90 205 48 S265 15 310 44 S370 90 420 48 S500 30 600 18 L600 110 L0 110Z"/></svg><div class="chart-foot"><span>CPU / MEMORY TREND</span><span>Prometheus-backed current readings</span></div></div><div class="ops-side glass-panel"><div class="visual-kicker">FLEET SNAPSHOT</div><div class="fleet-number" id="ov-nodes">—</div><span>Nodes in cluster</span><div class="fleet-divider"></div><div class="fleet-row"><span>Pods</span><b id="ov-pods">—</b></div><div class="fleet-row"><span>Unhealthy</span><b class="danger-text" id="ov-failed">—</b></div><div class="fleet-row"><span>Open incidents</span><b class="warn-text" id="ov-incidents">—</b></div><div class="fleet-divider"></div><div class="visual-kicker">DEPLOYMENT AVAILABILITY</div><div class="deploy-value" id="ov-deploy">—</div></div></div><div class="overview-lower"><div class="glass-panel topology-panel"><div class="visual-head"><div><div class="visual-kicker">CLUSTER MAP</div><h3>Node & workload topology</h3></div><span class="live-pill">LIVE INVENTORY</span></div><div class="topology-art"><div class="topo-core">K3S<br><small>CONTROL PLANE</small></div><div class="topo-node n1">NODE 01</div><div class="topo-node n2">NODE 02</div><div class="topo-node n3">WORKLOADS</div><svg viewBox="0 0 700 220" preserveAspectRatio="none"><path d="M350 110 L120 35 M350 110 L580 35 M350 110 L350 205 M120 35 L350 205 M580 35 L350 205"/></svg></div><p class="visual-note">Topology is a conceptual cluster view; node and workload counts are sourced from Kubernetes.</p></div><div class="glass-panel health-list"><div class="visual-kicker">OPERATIONAL SIGNALS</div><h3>Cluster health checks</h3><div class="signal-row"><i class="signal green-signal"></i><span>Node readiness</span><b id="ov-node-status">—</b></div><div class="signal-row"><i class="signal cyan-signal"></i><span>Pod inventory</span><b id="ov-pod-status">—</b></div><div class="signal-row"><i class="signal amber-signal"></i><span>Incident queue</span><b id="ov-incident-status">—</b></div></div></div>
+
+<div id="overview"></div><div class="grid">
+<div class="card metric-tile" role="button" tabindex="0" onclick="navigateTo('overview')"><div class="metric-head"><span>CLUSTER HEALTH</span><span class="green">●</span></div><div class="metric green" id="health">—</div><div class="sub" id="healthsub">Awaiting cluster data</div></div>
+<div class="card metric-tile" role="button" tabindex="0" onclick="navigateTo('pods')"><div class="metric-head"><span>TOTAL PODS</span><span class="cyan">◈</span></div><div class="metric" id="pods">—</div><div class="sub" id="podsub">Across monitored namespaces</div></div>
+<div class="card metric-tile" role="button" tabindex="0" onclick="navigateTo('pods')"><div class="metric-head"><span>UNHEALTHY PODS</span><span class="red">◆</span></div><div class="metric red" id="failed">—</div><div class="sub">Pending, failed or not ready</div></div>
+<div class="card metric-tile" role="button" tabindex="0" onclick="navigateTo('incidents')"><div class="metric-head"><span>OPEN INCIDENTS</span><span class="amber">⚑</span></div><div class="metric amber" id="incidents">—</div><div class="sub" id="incsub">AI investigation records</div></div>
 </div>
 <div class="section"><h2>Cluster intelligence</h2><span id="updated">Last updated —</span></div>
-<div class="two">
+<div id="cluster"></div><div class="two">
 <div class="card"><div class="metric-head"><span>WORKLOAD HEALTH</span><span>Pods by state</span></div><div class="chart" id="podchart"></div><div class="legend"><span><i style="background:#51d6a2"></i>Running</span><span><i style="background:#ffc36a"></i>Pending</span><span><i style="background:#ff7185"></i>Failed / Unknown</span></div></div>
 <div class="card"><div class="metric-head"><span>NODE FLEET</span><span id="nodecount">—</span></div><div style="display:flex;align-items:center;gap:22px;padding:22px 8px"><div style="font-size:48px" class="cyan">⌘</div><div><div class="metric" id="nodes">—</div><div class="sub">Kubernetes nodes</div><div style="margin-top:12px" id="nodestatus"></div></div></div></div>
 </div>
@@ -46,16 +250,88 @@ body[data-theme="light"] .logbox{background:#172338;color:#d6fbe7}
 <div class="card"><div class="metric-head"><span>MEMORY UTILIZATION</span><span class="blue">RAM</span></div><div class="metric blue" id="memory">—</div><div class="sub" id="memsub">Prometheus metric unavailable</div></div>
 <div class="card"><div class="metric-head"><span>DEPLOYMENT AVAILABILITY</span><span class="green">APP</span></div><div class="metric green" id="deploy">—</div><div class="sub" id="deploysub">Available / desired replicas</div></div>
 </div>
-<div class="section"><h2>Active incidents</h2><a class="link" href="/incidents">Incident API ↗</a></div>
+
+
+</section>
+<section class="page-view" id="page-incidents" data-page="incidents" hidden>
+ <div class="page-heading"><div><div class="eyebrow">CLUSTERPULSE AI</div><h2>Incident management</h2><p>Severity distribution, active alerts, and incident lifecycle.</p></div><span class="page-chip">LIVE MONITORING</span></div>
+<div class="incident-command"><div class="incident-score glass-panel"><div class="visual-kicker">INCIDENT HEALTH</div><div class="incident-ring"><strong id="ic-open">—</strong><span>OPEN</span></div><div class="incident-score-foot">Active incident records</div><div class="incident-mini"><span>CRITICAL</span><b id="ic-critical">—</b></div><div class="incident-mini"><span>HIGH</span><b id="ic-high">—</b></div></div><div class="incident-visual glass-panel"><div class="visual-head"><div><div class="visual-kicker">SEVERITY DISTRIBUTION</div><h3>Incident landscape</h3></div><span class="live-pill">LIVE INCIDENTS</span></div><div class="severity-bars"><div><span>CRITICAL</span><i><b id="ic-bar-critical"></b></i><strong id="ic-val-critical">0</strong></div><div><span>HIGH</span><i><b id="ic-bar-high"></b></i><strong id="ic-val-high">0</strong></div><div><span>MEDIUM</span><i><b id="ic-bar-medium"></b></i><strong id="ic-val-medium">0</strong></div><div><span>LOW</span><i><b id="ic-bar-low"></b></i><strong id="ic-val-low">0</strong></div></div><p class="visual-note">Select a severity to filter the incident register below.</p></div><div class="incident-flow glass-panel"><div class="visual-kicker">RESPONSE LIFECYCLE</div><h3>Investigation pipeline</h3><div class="flow-step"><i>01</i><span>Detected</span><b>Incident record</b></div><div class="flow-step"><i>02</i><span>Investigating</span><b>RCA analysis</b></div><div class="flow-step"><i>03</i><span>Notified</span><b>Email status</b></div><div class="flow-step"><i>04</i><span>Resolved</span><b>Operator action</b></div></div></div>
+
+<div id="incident-dashboard"></div>
+<div class="section"><h2>Incident intelligence · severity overview</h2><span>Click a severity to filter incidents</span></div>
+<div class="severity-grid">
+ <div class="card severity-card CRITICAL" onclick="filterIncidents('CRITICAL')"><span class="sev CRITICAL">CRITICAL</span><strong id="sev-critical">0</strong><small>Critical incidents</small></div>
+ <div class="card severity-card HIGH" onclick="filterIncidents('HIGH')"><span class="sev HIGH">HIGH</span><strong id="sev-high">0</strong><small>High severity</small></div>
+ <div class="card severity-card MEDIUM" onclick="filterIncidents('MEDIUM')"><span class="sev MEDIUM">MEDIUM</span><strong id="sev-medium">0</strong><small>Medium severity</small></div>
+ <div class="card severity-card LOW" onclick="filterIncidents('LOW')"><span class="sev LOW">LOW</span><strong id="sev-low">0</strong><small>Low severity</small></div>
+</div>
+<div class="section"><h2>Active incidents</h2><div class="toolbar"><select id="incident-filter" onchange="renderIncidents()"><option value="">All severities</option><option>CRITICAL</option><option>HIGH</option><option>MEDIUM</option><option>LOW</option></select><span id="incident-total">Live incident records</span></div><a class="link" href="/incidents">Incident API ↗</a></div>
 <div class="card tablewrap"><table><thead><tr><th>SEVERITY</th><th>NAMESPACE</th><th>RESOURCE</th><th>SUMMARY</th><th>STATUS</th><th>OCCURRENCES</th></tr></thead><tbody id="incidentrows"><tr><td colspan="6" class="empty">Loading incidents…</td></tr></tbody></table></div>
-<div class="section"><h2>Pod monitoring</h2><div class="toolbar"><input id="podsearch" placeholder="Search pod, namespace, node…" oninput="debouncedPods()"><select id="podphase" onchange="loadPods()"><option value="">All states</option><option>Running</option><option>Pending</option><option>Succeeded</option><option>Failed</option></select><button class="smallbtn" onclick="loadPods()">Refresh pods</button></div></div>
+
+</section>
+<section class="page-view" id="page-pods" data-page="pods" hidden>
+ <div class="page-heading"><div><div class="eyebrow">CLUSTERPULSE AI</div><h2>Pod monitoring</h2><p>Inspect pod phases, readiness, restarts, and placement.</p></div><span class="page-chip">LIVE MONITORING</span></div>
+<div class="pod-hero glass-panel"><div><div class="visual-kicker">POD OPERATIONS CENTER</div><h3>Container lifecycle monitor</h3><p>Phase, readiness, restart count and node placement.</p></div><div class="pod-status-rings"><div class="pod-ring"><b id="pod-total-vis">—</b><span>TOTAL</span></div><div class="pod-ring ring-warn"><b id="pod-restart-vis">—</b><span>RESTARTS</span></div><div class="pod-ring ring-bad"><b id="pod-unhealthy-vis">—</b><span>UNHEALTHY</span></div></div></div><div class="pod-activity glass-panel"><div class="visual-kicker">POD STATE DISTRIBUTION</div><div class="pod-state-track"><i class="state-running" id="pod-running-bar"></i><i class="state-pending" id="pod-pending-bar"></i><i class="state-failed" id="pod-failed-bar"></i></div><div class="pod-state-legend"><span>● Running</span><span>● Pending</span><span>● Failed / Other</span></div></div>
+
+<div id="pods-section"></div><div class="section"><h2>Pod monitoring</h2><div class="toolbar"><input id="podsearch" placeholder="Search pod, namespace, node…" oninput="debouncedPods()"><select id="podphase" onchange="loadPods()"><option value="">All states</option><option>Running</option><option>Pending</option><option>Succeeded</option><option>Failed</option></select><button class="smallbtn" onclick="loadPods()">Refresh pods</button></div></div>
 <div class="card tablewrap"><table><thead><tr><th>NAMESPACE</th><th>POD</th><th>PHASE</th><th>READY</th><th>RESTARTS</th><th>NODE</th><th>CONDITION</th><th>LOGS</th></tr></thead><tbody id="podrows"><tr><td colspan="8" class="empty">Loading pods…</td></tr></tbody></table></div>
-<div class="section"><h2>Container logs</h2><span id="logtitle">Select “View logs” on a pod</span></div>
-<div class="card"><div class="toolbar" style="margin-bottom:12px"><select id="logcontainer"><option value="">Default container</option></select><select id="logtail"><option value="100">Last 100 lines</option><option value="200" selected>Last 200 lines</option><option value="500">Last 500 lines</option><option value="1000">Last 1000 lines</option></select><label style="font-size:12px;color:var(--muted)"><input type="checkbox" id="previousLogs"> Previous container</label><button class="smallbtn" onclick="refreshLogs()">Refresh logs</button></div><pre class="logbox" id="logoutput">Choose a pod to inspect its current or previous container logs. Access is read-only.</pre></div>
-<div class="section"><h2>Node health</h2><span>Readiness and pressure conditions</span></div>
+
+</section>
+<section class="page-view" id="page-logs" data-page="logs" hidden>
+ <div class="page-heading"><div><div class="eyebrow">CLUSTERPULSE AI</div><h2>Container logs</h2><p>Read current or previous container logs for a selected pod.</p></div><span class="page-chip">LIVE MONITORING</span></div>
+<div class="logs-hero glass-panel"><div class="visual-kicker">OBSERVABILITY / LOG EXPLORER</div><h3>Container log intelligence</h3><p>Inspect current and previous container output. Select a namespace and pod here to load logs directly.</p><div class="log-feature-row"><div><b>READ-ONLY</b><span>Safe log inspection</span></div><div><b>CONTAINER-AWARE</b><span>Choose container and tail length</span></div><div><b>LIVE FETCH</b><span>Retrieved from Kubernetes API</span></div></div></div>
+
+<div class="section"><h2>Container logs</h2><span id="logtitle">Choose a namespace and pod to begin</span></div>
+<div class="card">
+ <div class="toolbar" style="margin-bottom:12px">
+  <select id="lognamespace" onchange="filterLogPods()"><option value="">All namespaces</option></select>
+  <select id="logpod" onchange="selectLogPod()"><option value="">Select pod</option></select>
+  <select id="logcontainer" onchange="refreshLogs()"><option value="">Default container</option></select>
+  <select id="logtail" onchange="refreshLogs()"><option value="100">Last 100 lines</option><option value="200" selected>Last 200 lines</option><option value="500">Last 500 lines</option><option value="1000">Last 1000 lines</option></select>
+  <label style="font-size:12px;color:var(--muted)"><input type="checkbox" id="previousLogs" onchange="refreshLogs()"> Previous container</label>
+  <button class="smallbtn" onclick="loadLogsPage()">Reload pods</button>
+  <button class="smallbtn" onclick="refreshLogs()">Refresh logs</button>
+ </div>
+ <pre class="logbox" id="logoutput">Select a namespace and pod to inspect container logs. Access is read-only.</pre>
+</div>
+
+</section>
+<section class="page-view" id="page-nodes" data-page="nodes" hidden>
+ <div class="page-heading"><div><div class="eyebrow">CLUSTERPULSE AI</div><h2>Node health</h2><p>Node readiness, capacity signals, and pressure conditions.</p></div><span class="page-chip">LIVE MONITORING</span></div>
+<div class="fleet-hero glass-panel"><div><div class="visual-kicker">KUBERNETES INFRASTRUCTURE</div><h3>Node fleet operations</h3><p>Readiness and pressure conditions from the Kubernetes API.</p></div><div class="fleet-big"><strong id="node-live-count">—</strong><span>REGISTERED NODES</span></div><div class="fleet-status"><span class="signal green-signal"></span><span id="node-live-ready">Awaiting node inventory</span></div></div><div class="node-visual-grid"><div class="glass-panel node-map"><div class="visual-kicker">FLEET TOPOLOGY</div><h3>Node distribution</h3><div class="node-orbit live-node-grid" id="node-orbit"><div class="orbit-ring"></div><div class="orbit-core">K3S</div></div><p class="visual-note"></p></div><div class="glass-panel node-condition"><div class="visual-kicker">CONDITION MONITOR</div><h3>Live node conditions</h3><div id="node-condition"></div><div class="fleet-divider"></div><div class="visual-kicker">NODE CAPACITY</div><div id="node-capacity"></div></div></div>
+
+<div id="nodes-section"></div><div class="section"><h2>Node health</h2><span>Readiness and pressure conditions</span></div>
 <div class="card tablewrap"><table><thead><tr><th>NODE</th><th>READY</th><th>CPU</th><th>MEMORY</th><th>DISK PRESSURE</th><th>PID PRESSURE</th></tr></thead><tbody id="noderows"><tr><td colspan="6" class="empty">Loading nodes…</td></tr></tbody></table></div>
-<div class="section"><h2>Workload inventory</h2><div><select id="nsfilter" onchange="loadWorkloads()"><option value="">All namespaces</option></select></div></div>
+
+</section>
+<section class="page-view" id="page-workloads" data-page="workloads" hidden>
+ <div class="page-heading"><div><div class="eyebrow">CLUSTERPULSE AI</div><h2>Workload inventory</h2><p>Deployment and controller replica health across namespaces.</p></div><span class="page-chip">LIVE MONITORING</span></div>
+<div class="workload-hero glass-panel"><div><div class="visual-kicker">CONTROLLER OPERATIONS</div><h3>Workload orchestration</h3><p>Deployment, StatefulSet and DaemonSet replica health.</p></div><div class="workload-orbit"><div class="work-orbit-core">K8S</div><span class="work-pill wp1">DEPLOYMENTS <b id="wl-deployments">—</b></span><span class="work-pill wp2">STATEFULSETS <b id="wl-statefulsets">—</b></span><span class="work-pill wp3">DAEMONSETS <b id="wl-daemonsets">—</b></span><span class="work-pill wp4">REPLICASETS <b id="wl-replicasets">—</b></span></div></div><div class="workload-kpis"><div class="glass-panel"><span>INVENTORY</span><b id="wl-total">—</b><small>Workload objects</small></div><div class="glass-panel"><span>HEALTHY</span><b id="wl-healthy">—</b><small>Ready replicas</small></div><div class="glass-panel"><span>DEGRADED</span><b id="wl-degraded">—</b><small>Needs attention</small></div></div>
+
+<div id="workloads-section"></div><div class="section"><h2>Workload inventory</h2><div><select id="nsfilter" onchange="loadWorkloads()"><option value="">All namespaces</option></select></div></div>
 <div class="card tablewrap"><table><thead><tr><th>NAMESPACE</th><th>WORKLOAD</th><th>TYPE</th><th>READY</th><th>DESIRED</th><th>STATUS</th></tr></thead><tbody id="workrows"><tr><td colspan="6" class="empty">Loading workloads…</td></tr></tbody></table></div>
+
+
+</section>
+<section class="page-view" id="page-rca" data-page="rca" hidden>
+ <div class="page-heading"><div><div class="eyebrow">INTELLIGENCE CENTER</div><h2>AI Root Cause Analysis</h2><p>Review incident investigations, confidence, impact, and recommended remediation.</p></div><span class="page-chip">AI INVESTIGATIONS</span></div>
+<div class="rca-workspace"><div class="rca-focus glass-panel"><div class="visual-kicker">AI INVESTIGATION WORKSPACE</div><h3>Root cause intelligence</h3><p>Evidence-backed analysis, confidence, blast radius and remediation guidance.</p><div class="rca-flow"><span>INCIDENT</span><i>→</i><span>EVIDENCE</span><i>→</i><span>HYPOTHESES</span><i>→</i><span>REMEDIATION</span></div></div><div class="rca-side glass-panel"><div class="visual-kicker">ANALYSIS COVERAGE</div><div class="rca-coverage"><strong id="rca-coverage">—</strong><span>WITH RCA</span></div><p class="visual-note">Coverage is calculated from returned incident records with RCA data.</p></div></div>
+
+ <div class="grid rca-summary-grid">
+  <div class="card"><div class="metric-head"><span>INCIDENTS WITH RCA</span><span class="cyan">✧</span></div><div class="metric cyan" id="rca-count">—</div><div class="sub">Investigation records available</div></div>
+  <div class="card"><div class="metric-head"><span>ANALYSIS PENDING</span><span class="amber">◷</span></div><div class="metric amber" id="rca-pending">—</div><div class="sub">Awaiting AI analysis</div></div>
+  <div class="card"><div class="metric-head"><span>EMAIL SENT</span><span class="green">✉</span></div><div class="metric green" id="rca-emailed">—</div><div class="sub">Incident notifications delivered</div></div>
+  <div class="card"><div class="metric-head"><span>OPEN INVESTIGATIONS</span><span class="red">⚑</span></div><div class="metric red" id="rca-open">—</div><div class="sub">Incidents still open</div></div>
+ </div>
+ <div class="section"><h2>Investigation history</h2><span>Choose an incident to inspect the full RCA</span></div>
+ <div class="card tablewrap"><table><thead><tr><th>SEVERITY</th><th>RESOURCE</th><th>SUMMARY</th><th>RCA STATUS</th><th>CONFIDENCE</th><th>EMAIL</th><th>DETAILS</th></tr></thead><tbody id="rca-rows"><tr><td colspan="7" class="empty">Loading investigations…</td></tr></tbody></table></div>
+</section>
+<div id="incident-drawer" class="drawer-backdrop" onclick="if(event.target===this)closeIncident()">
+ <section class="drawer">
+  <div class="drawer-head"><div><div class="sub">INCIDENT ROOT CAUSE ANALYSIS</div><h2 id="drawer-title">Incident details</h2></div><button class="drawer-close" onclick="closeIncident()">×</button></div>
+  <div id="drawer-content"><p class="empty">Select an incident to inspect its RCA.</p></div>
+ </section>
+</div>
 <footer class="bottom">ClusterPulse AI · Read-only monitoring · AI recommendations require human validation · <span id="footertime"></span></footer>
 </div>
 <script>
@@ -65,9 +341,122 @@ function badge(ok,yes='Ready',no='NotReady'){return `<span class="status ${ok?'o
 function drawBars(data){const vals=[data.running||0,data.pending||0,(data.failed||0)+(data.unknown||0)],max=Math.max(1,...vals),cols=['#51d6a2','#ffc36a','#ff7185'],labs=['Running','Pending','Failed'];$('podchart').innerHTML=vals.map((v,i)=>`<div class="barcol"><span class="barlabel">${v}</span><div class="bar" style="height:${Math.max(3,v/max*145)}px;background:${cols[i]}"></div><span class="barlabel">${labs[i]}</span></div>`).join('')}
 async function loadOverview(){const d=await api('/api/overview');$('health').textContent=pct(d.health_pct);$('healthsub').textContent=`${d.ready_nodes}/${d.total_nodes} nodes ready · ${d.ready_pods}/${d.total_pods} pods ready`;$('pods').textContent=fmt(d.total_pods);$('podsub').textContent=`${d.running} running · ${d.pending} pending`;$('failed').textContent=fmt(d.unhealthy_pods);$('nodes').textContent=fmt(d.total_nodes);$('nodecount').textContent=`${d.ready_nodes} ready`;$('nodestatus').innerHTML=badge(d.ready_nodes===d.total_nodes,'All nodes ready',`${d.total_nodes-d.ready_nodes} node issue(s)`);$('deploy').textContent=d.deployment_pct==null?'—':pct(d.deployment_pct);$('deploysub').textContent=`${d.available_replicas}/${d.desired_replicas} replicas available`;drawBars(d);$('updated').textContent='Last updated '+new Date().toLocaleTimeString();$('connection').textContent='Live API connected';}
 async function loadMetrics(){try{const d=await api('/api/metrics');$('cpu').textContent=pct(d.cpu_pct);$('memory').textContent=pct(d.memory_pct);$('cpusub').textContent=d.cpu_pct==null?'Prometheus metric unavailable':'Cluster CPU usage';$('memsub').textContent=d.memory_pct==null?'Prometheus metric unavailable':'Cluster memory usage'}catch(e){$('cpusub').textContent='Metrics endpoint unavailable'}}
-async function loadIncidents(){const a=await api('/incidents?limit=50');const open=a.filter(x=>x.status==='OPEN');$('incidents').textContent=open.length;$('incsub').textContent=`${a.length} recorded incidents`; $('incidentrows').innerHTML=a.length?a.slice(0,20).map(x=>`<tr><td><span class="sev ${x.severity}">${x.severity}</span></td><td>${esc(x.namespace)}</td><td>${esc(x.pod_name||'Cluster resource')}</td><td>${esc(x.summary||'')}</td><td>${badge(x.status!=='OPEN',x.status,x.status)}</td><td>${x.occurrences||1}</td></tr>`).join(''):'<tr><td colspan="6" class="empty">No incidents recorded</td></tr>'}
-async function loadNodes(){const a=await api('/api/nodes');$('noderows').innerHTML=a.length?a.map(n=>`<tr><td>${esc(n.name)}</td><td>${badge(n.ready)}</td><td>${esc(n.cpu||'—')}</td><td>${esc(n.memory||'—')}</td><td>${badge(!n.disk_pressure,'Normal','Pressure')}</td><td>${badge(!n.pid_pressure,'Normal','Pressure')}</td></tr>`).join(''):'<tr><td colspan="6" class="empty">No node data</td></tr>'}
-async function loadWorkloads(){const ns=$('nsfilter').value;const a=await api('/api/workloads'+(ns?'?namespace='+encodeURIComponent(ns):''));const namespaces=[...new Set(a.map(x=>x.namespace))].sort();const sel=$('nsfilter');const current=sel.value;sel.innerHTML='<option value="">All namespaces</option>'+namespaces.map(n=>`<option value="${esc(n)}">${esc(n)}</option>`).join('');sel.value=current;$('workrows').innerHTML=a.length?a.slice(0,150).map(w=>`<tr><td>${esc(w.namespace)}</td><td>${esc(w.name)}</td><td>${esc(w.kind)}</td><td>${w.ready}</td><td>${w.desired}</td><td>${badge(w.ready>=w.desired,w.ready>=w.desired?'Healthy':'Degraded')}</td></tr>`).join(''):'<tr><td colspan="6" class="empty">No workload data</td></tr>'}
+
+let incidentData=[],activeIncidentFilter='';
+function filterIncidents(sev){
+ activeIncidentFilter=activeIncidentFilter===sev?'':sev;
+ $('incident-filter').value=activeIncidentFilter;
+ document.querySelectorAll('.severity-card').forEach(c=>c.classList.toggle('selected',c.classList.contains(activeIncidentFilter)));
+ renderIncidents();
+}
+function renderIncidents(){
+ const f=$('incident-filter').value;
+ const a=f?incidentData.filter(x=>x.severity===f):incidentData;
+ $('incident-total').textContent=a.length+' incidents shown';
+ $('incidentrows').innerHTML=a.length?a.slice(0,50).map(x=>`<tr class="incident-row" onclick="openIncident('${esc(x.id)}')"><td><span class="sev ${esc(x.severity)}">${esc(x.severity)}</span></td><td>${esc(x.namespace)}</td><td>${esc(x.pod_name||'Cluster resource')}</td><td>${esc(x.summary||'')}</td><td>${badge(x.status!=='OPEN',x.status,x.status)}</td><td>${x.occurrences||1}</td></tr>`).join(''):'<tr><td colspan="6" class="empty">No incidents in this severity</td></tr>';
+}
+async function loadIncidents(){
+ const a=await api('/incidents?limit=100');incidentData=a;
+ const open=a.filter(x=>x.status==='OPEN');
+ $('incidents').textContent=open.length;$('incsub').textContent=a.length+' recorded incidents';
+ for(const sev of ['CRITICAL','HIGH','MEDIUM','LOW'])$( 'sev-'+sev.toLowerCase()).textContent=a.filter(x=>x.severity===sev).length;
+ renderIncidents();
+}
+function rcaSection(title,content){
+ return `<div class="rca-block"><h3>${title}</h3>${content||'<p>Not available yet</p>'}</div>`;
+}
+function rcaList(value){
+ return Array.isArray(value)&&value.length?'<ul>'+value.map(x=>'<li>'+esc(typeof x==='string'?x:JSON.stringify(x))+'</li>').join('')+'</ul>':'<p>Not available yet</p>';
+}
+async function openIncident(id){
+ $('drawer-title').textContent='Loading incident…';
+ $('drawer-content').innerHTML='<p class="empty">Loading incident details and RCA…</p>';
+ $('incident-drawer').classList.add('open');
+ try{
+  const x=await api('/incidents/'+encodeURIComponent(id)),r=x.rca||{};
+  $('drawer-title').textContent=(x.severity||'INCIDENT')+' · '+(x.pod_name||x.namespace||'Cluster resource');
+  const whys=Array.isArray(r.five_whys)?'<ol>'+r.five_whys.map(w=>'<li><b>'+esc(w.why||'Why?')+'</b> '+esc(w.answer||'')+'</li>').join('')+'</ol>':'<p>Not available yet</p>';
+  const rcaStatus=x.rca_status||(x.rca?'COMPLETED':'PENDING');
+  const attempts=Number(x.rca_attempts||0);
+  const retryAt=x.rca_next_retry?new Date(x.rca_next_retry).toLocaleString():'Not scheduled';
+  const rcaProgress='<p>Status: <b>'+esc(rcaStatus)+'</b><br>Attempts: '+esc(attempts)+'<br>Next retry: '+esc(retryAt)+'</p>'+
+    (x.rca_last_error?'<p class="danger-text">Last error: '+esc(x.rca_last_error)+'</p>':'');
+  const rootCauseText=r.root_cause||(
+    rcaStatus==='FAILED'?'RCA analysis failed. See processing details for the last error and retry schedule.':
+    rcaStatus==='PROCESSING'?'AI analysis is currently running.':
+    'AI analysis is pending or unavailable.');
+  $('drawer-content').innerHTML=
+   `<div class="toolbar"><span class="sev ${esc(x.severity)}">${esc(x.severity)}</span>${badge(x.status!=='OPEN',x.status,x.status)}${badge(x.email_status==='SENT','Email sent',x.email_status||'Email pending')}${badge(rcaStatus==='COMPLETED',rcaStatus,rcaStatus)}</div>
+   ${rcaSection('RCA PROCESSING DETAILS',rcaProgress)}
+   ${rcaSection('INCIDENT SUMMARY','<p>'+esc(r.incident_summary||x.summary||'')+'</p>')}
+   ${rcaSection('ROOT CAUSE · '+esc(r.confidence||'Confidence pending'),'<p>'+esc(rootCauseText)+'</p>')}
+   ${rcaSection('RESOURCE CONTEXT','<p>Namespace: '+esc(x.namespace)+'<br>Pod: '+esc(x.pod_name)+'<br>Node: '+esc(x.node_name)+'<br>Occurrences: '+esc(x.occurrences)+'</p>')}
+   ${rcaSection('EVIDENCE',rcaList(r.evidence||[]))}
+   ${rcaSection('FIVE WHYS',whys)}
+   ${rcaSection('IMPACT','<p>'+esc(r.impact||'Not available yet')+'</p>')}
+   ${rcaSection('IMMEDIATE ACTIONS',rcaList(r.immediate_actions||[]))}
+   ${rcaSection('PREVENTIVE ACTIONS',rcaList(r.preventive_actions||[]))}
+   ${rcaSection('SUGGESTED KUBECTL COMMANDS',rcaList(r.kubectl_commands||[]))}
+   ${rcaSection('FURTHER INVESTIGATION',rcaList(r.further_investigation||[]))}`;
+ }catch(e){$('drawer-content').innerHTML='<p class="empty">Unable to load incident: '+esc(e.message)+'</p>'}
+}
+function closeIncident(){$('incident-drawer').classList.remove('open')}
+function goTo(id){document.getElementById(id)?.scrollIntoView({behavior:'smooth',block:'start'})}
+
+
+async function loadNodes(){
+ const a=await api('/api/nodes');
+
+ $('noderows').innerHTML=a.length?a.map(n=>`<tr>
+ <td>${esc(n.name)}</td><td>${badge(n.ready)}</td>
+ <td>${esc(n.cpu||'—')}</td><td>${esc(n.memory||'—')}</td>
+ <td>${badge(!n.disk_pressure,'Normal','Pressure')}</td>
+ <td>${badge(!n.pid_pressure,'Normal','Pressure')}</td></tr>`).join(''):'<tr><td colspan="6" class="empty">No node data</td></tr>';
+
+ $('node-live-count').textContent=a.length;
+ $('node-live-ready').textContent=`${a.filter(n=>n.ready).length} of ${a.length} nodes Ready`;
+
+ $('node-orbit').innerHTML =
+ '<div class="orbit-ring"></div><div class="orbit-core">K3S</div>' +
+ (a.length ? a.map(n=>`<div class="live-node-chip ${n.ready?'node-ok':'node-bad'}"><b>${esc(n.name)}</b><small>${n.ready?'READY':'NOT READY'}</small></div>`).join('') : '<div class="visual-note">No nodes returned</div>');
+
+ const conditions=[
+ ['Readiness',n=>n.ready,'Ready','Not Ready'],
+ ['Disk pressure',n=>!n.disk_pressure,'Normal','Pressure'],
+ ['PID pressure',n=>!n.pid_pressure,'Normal','Pressure'],
+ ['Memory pressure',n=>!n.memory_pressure,'Normal','Pressure']
+ ];
+
+ $('node-condition').innerHTML=conditions.map(([label,ok,yes,no])=>{
+ const good=a.filter(n=>ok(n)).length;
+ const bad=a.length-good;
+ return `<div class="condition-line"><span>${label}</span><b class="${bad?'danger-text':'condition-good'}">${a.length?`${good}/${a.length} ${bad?no:yes}`:'No data'}</b></div>`;
+ }).join('');
+
+ $('node-capacity').innerHTML=a.length?a.map(n=>`
+ <div class="condition-line"><span>${esc(n.name)} · CPU</span><b>${esc(n.cpu||'—')}</b></div>
+ <div class="condition-line"><span>${esc(n.name)} · Memory</span><b>${esc(n.memory||'—')}</b></div>`).join(''):'<div class="visual-note">No capacity data</div>';
+}
+
+async function loadWorkloads(){
+ const ns=$('nsfilter').value;
+ const a=await api('/api/workloads'+(ns?'?namespace='+encodeURIComponent(ns):''));
+ const count=kind=>a.filter(w=>w.kind===kind).length;
+ const ready=a.reduce((n,w)=>n+(Number(w.ready)||0),0);
+ const desired=a.reduce((n,w)=>n+(Number(w.desired)||0),0);
+ $('wl-total').textContent=a.length;
+ $('wl-healthy').textContent=ready;
+ $('wl-degraded').textContent=Math.max(0,desired-ready);
+ $('wl-deployments').textContent=count('Deployment');
+ $('wl-statefulsets').textContent=count('StatefulSet');
+ $('wl-daemonsets').textContent=count('DaemonSet');
+ $('wl-replicasets').textContent=count('ReplicaSet');
+ const namespaces=[...new Set(a.map(x=>x.namespace))].sort();
+ const sel=$('nsfilter'),current=sel.value;
+ sel.innerHTML='<option value="">All namespaces</option>'+namespaces.map(n=>`<option value="${esc(n)}">${esc(n)}</option>`).join('');
+ sel.value=current;
+ $('workrows').innerHTML=a.length?a.slice(0,150).map(w=>`<tr><td>${esc(w.namespace)}</td><td>${esc(w.name)}</td><td>${esc(w.kind)}</td><td>${w.ready}</td><td>${w.desired}</td><td>${badge(w.ready>=w.desired,w.ready>=w.desired?'Healthy':'Degraded')}</td></tr>`).join(''):'<tr><td colspan="6" class="empty">No workload data</td></tr>';
+}
 function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
 
 let selectedPod=null,podTimer=null;
@@ -80,6 +469,49 @@ async function loadPods(){
  return `<tr><td>${esc(p.namespace)}</td><td>${esc(p.name)}</td><td>${badge(p.phase==='Running',p.phase,p.phase)}</td><td>${p.ready}/${p.containers}</td><td class="${p.restarts?'amber':'green'}">${p.restarts}</td><td>${esc(p.node||'—')}</td><td>${esc(condition||'—')}</td><td><button class="smallbtn" onclick="showLogs('${encodeURIComponent(p.namespace)}','${encodeURIComponent(p.name)}','${encodeURIComponent(JSON.stringify(p.container_names||[]))}')">View logs</button></td></tr>`
  }).join(''):'<tr><td colspan="8" class="empty">No matching pods</td></tr>'}
  catch(e){$('podrows').innerHTML=`<tr><td colspan="8" class="empty">${esc(e.message)}</td></tr>`}
+}
+let logPods=[];
+async function loadLogsPage(){
+ $('logoutput').textContent='Loading pod inventory…';
+ try{
+  logPods=await api('/api/pods');
+  const namespaces=[...new Set(logPods.map(p=>p.namespace))].sort();
+  const ns=$('lognamespace'),previous=ns.value;
+  ns.innerHTML='<option value="">All namespaces</option>'+namespaces.map(n=>`<option value="${esc(n)}">${esc(n)}</option>`).join('');
+  ns.value=namespaces.includes(previous)?previous:'';
+  filterLogPods();
+ }catch(e){
+  $('logoutput').textContent='Unable to load pods: '+e.message;
+ }
+}
+function filterLogPods(){
+ const ns=$('lognamespace').value;
+ const list=logPods.filter(p=>!ns||p.namespace===ns);
+ const pod=$('logpod'),previous=selectedPod?.pod;
+ pod.innerHTML='<option value="">Select pod</option>'+list.map(p=>`<option value="${esc(p.namespace)}|${esc(p.name)}">${esc(p.name)}</option>`).join('');
+ const match=list.find(p=>p.name===previous&&p.namespace===selectedPod?.namespace);
+ if(match){
+  pod.value=match.namespace+'|'+match.name;
+  selectLogPod();
+ }else{
+  selectedPod=null;
+  $('logcontainer').innerHTML='<option value="">Default container</option>';
+  $('logtitle').textContent='Choose a pod to inspect its logs';
+  $('logoutput').textContent=list.length?'Select a pod to load its logs.':'No pods found in this namespace.';
+ }
+}
+function selectLogPod(){
+ const value=$('logpod').value;
+ if(!value){selectedPod=null;return}
+ const [namespace,...parts]=value.split('|');
+ const name=parts.join('|');
+ const p=logPods.find(x=>x.namespace===namespace&&x.name===name);
+ if(!p)return;
+ selectedPod={namespace,pod:name};
+ const names=p.container_names||[];
+ $('logcontainer').innerHTML='<option value="">Default container</option>'+names.map(n=>`<option value="${esc(n)}">${esc(n)}</option>`).join('');
+ $('logtitle').textContent=namespace+'/'+name;
+ refreshLogs();
 }
 async function showLogs(ns,pod,container){
  selectedPod={namespace:decodeURIComponent(ns),pod:decodeURIComponent(pod)};
@@ -102,6 +534,97 @@ function applyTheme(mode){
 function setTheme(mode){$('themeMode').value=mode;try{localStorage.setItem('clusterpulse-theme',mode)}catch(e){}applyTheme(mode)}
 (function initTheme(){let mode='system';try{mode=localStorage.getItem('clusterpulse-theme')||'system'}catch(e){}$('themeMode').value=mode;applyTheme(mode);const mq=window.matchMedia('(prefers-color-scheme: light)');mq.addEventListener?.('change',()=>{if($('themeMode').value==='system')applyTheme('system')})})();
 
-async function loadAll(){try{await Promise.all([loadOverview(),loadMetrics(),loadIncidents(),loadNodes(),loadWorkloads(),loadPods()]);$('footertime').textContent=new Date().toLocaleString()}catch(e){$('connection').textContent='API error';console.error(e)}}
-loadAll();setInterval(loadAll,30000);
+let currentPage='overview';
+function navigateTo(page){
+ const allowed=['overview','incidents','nodes','workloads','pods','logs','rca'];
+ if(!allowed.includes(page))page='overview';
+ currentPage=page;
+ document.querySelectorAll('.page-view').forEach(v=>{v.hidden=v.dataset.page!==page});
+ document.querySelectorAll('.side-link[data-page]').forEach(a=>a.classList.toggle('active',a.dataset.page===page));
+ history.replaceState(null,'','#'+page);
+ refreshCurrentPage();
+}
+async function refreshCurrentPage(){
+ try{
+  if(currentPage==='overview'){await Promise.all([loadOverview(),loadMetrics(),loadIncidents()]);}
+  else if(currentPage==='incidents'){await loadIncidents();}
+  else if(currentPage==='nodes'){await loadNodes();}
+  else if(currentPage==='workloads'){await loadWorkloads();}
+  else if(currentPage==='pods'){await loadPods();}
+  else if(currentPage==='logs'){await loadLogsPage();}
+  else if(currentPage==='rca'){await loadIncidents();renderRcaDashboard();}
+  $('footertime').textContent=new Date().toLocaleString();
+ }catch(e){$('connection').textContent='API error';console.error(e)}
+}
+function renderRcaDashboard(){
+ const a=incidentData||[];
+ const status=x=>x.rca_status||(x.rca?'COMPLETED':'PENDING');
+ const withRca=a.filter(x=>status(x)==='COMPLETED'&&x.rca);
+ const pending=a.filter(x=>['PENDING','PROCESSING'].includes(status(x)));
+ const failed=a.filter(x=>status(x)==='FAILED');
+
+ $('rca-count').textContent=withRca.length;
+ $('rca-pending').textContent=pending.length;
+ $('rca-emailed').textContent=a.filter(x=>x.email_status==='SENT').length;
+ $('rca-open').textContent=a.filter(x=>x.status==='OPEN').length;
+
+ $('rca-rows').innerHTML=a.length?a.slice(0,100).map(x=>{
+   const r=x.rca||{};
+   const st=status(x);
+   const labels={
+     COMPLETED:'Analysis ready',
+     PROCESSING:'Analyzing',
+     PENDING:'Pending',
+     FAILED:'Failed'
+   };
+   const retry=x.rca_next_retry
+     ? ' · Retry '+new Date(x.rca_next_retry).toLocaleString()
+     : '';
+   const attempts=Number(x.rca_attempts||0);
+   const detail=st==='FAILED'
+     ? 'Attempt '+attempts+(retry||' · Retry unavailable')
+     : st==='PROCESSING'
+       ? 'Attempt '+attempts
+       : st==='PENDING'
+         ? 'Awaiting analysis'
+         : 'Completed';
+   return `<tr class="incident-row" onclick="openIncident('${esc(x.id)}')">
+     <td><span class="sev ${esc(x.severity)}">${esc(x.severity)}</span></td>
+     <td>${esc(x.pod_name||x.namespace||'Cluster resource')}</td>
+     <td>${esc(x.summary||'')}</td>
+     <td>${badge(st==='COMPLETED',labels[st]||st,st)}<div class="visual-note">${esc(detail)}</div></td>
+     <td>${esc(r.confidence||'—')}</td>
+     <td>${esc(x.email_status||'Pending')}</td>
+     <td><button class="smallbtn" onclick="event.stopPropagation();openIncident('${esc(x.id)}')">View RCA</button></td>
+   </tr>`;
+ }).join(''):'<tr><td colspan="7" class="empty">No investigation records</td></tr>';
+
+ const coverage=a.length?Math.round(withRca.length/a.length*100)+'%':'—';
+ $('rca-coverage').textContent=coverage;
+}
+async function loadAll(){await refreshCurrentPage()}
+const initialPage=location.hash.slice(1);navigateTo(initialPage||'overview');
+
+function cpNum(id){const t=$(id)?.textContent||'';const n=parseFloat(t.replace(/[^0-9.]/g,''));return Number.isFinite(n)?n:0}
+function cpPct(id){return Math.max(0,Math.min(100,cpNum(id)))}
+function updateVisualDashboards(){
+ const health=$('health')?.textContent||'—',cpu=$('cpu')?.textContent||'—',mem=$('memory')?.textContent||'—';
+ const set=(id,v)=>{if($(id))$(id).textContent=v};
+ set('ov-health',health);set('ov-cpu',cpu);set('ov-memory',mem);set('ov-nodes',$('nodes')?.textContent||'—');set('ov-pods',$('pods')?.textContent||'—');set('ov-failed',$('failed')?.textContent||'—');set('ov-incidents',$('incidents')?.textContent||'—');set('ov-deploy',$('deploy')?.textContent||'—');
+ set('ov-health-caption',$('healthsub')?.textContent||'Cluster telemetry');set('ov-node-status',$('nodestatus')?.innerText||'—');set('ov-pod-status',$('podsub')?.textContent||'—');set('ov-incident-status',$('incsub')?.textContent||'—');
+ const gauge=$('overview-gauge');if(gauge){const n=cpPct('health');gauge.style.background=`conic-gradient(#56dfb0 0 ${n}%,#20364b ${n}% 100%)`}
+ const cb=$('ov-cpu-bar'),mb=$('ov-memory-bar');if(cb)cb.style.width=cpPct('cpu')+'%';if(mb)mb.style.width=cpPct('memory')+'%';
+ const data=(typeof incidentData!=='undefined'?incidentData:[]);const count=sev=>data.filter(x=>x.severity===sev).length;const max=Math.max(1,...['CRITICAL','HIGH','MEDIUM','LOW'].map(count));
+ set('ic-open',data.filter(x=>x.status==='OPEN').length);set('ic-critical',count('CRITICAL'));set('ic-high',count('HIGH'));
+ for(const sev of ['CRITICAL','HIGH','MEDIUM','LOW']){const k=sev.toLowerCase(),v=count(sev),bar=$('ic-bar-'+k);set('ic-val-'+k,v);if(bar)bar.style.width=(v/max*100)+'%'}
+ const total=data.length;set('rca-coverage',total?Math.round(data.filter(x=>x.rca&&Object.keys(x.rca).length).length/total*100)+'%':'—');
+ const nodeRows=$('noderows')?.querySelectorAll('tr')||[];set('node-live-count',nodeRows.length&&$('noderows').innerText.includes('No node data')?'0':nodeRows.length);set('node-live-ready',nodeRows.length?`${nodeRows.length} node row(s) returned`:'No node inventory returned');
+ const workloadRows=$('workrows')?.querySelectorAll('tr')||[];set('wl-total',workloadRows.length&&$('workrows').innerText.includes('No workload data')?'0':workloadRows.length);let healthy=0,degraded=0;workloadRows.forEach(r=>{if(r.innerText.includes('Healthy'))healthy++;else if(r.innerText.trim()&&!r.innerText.includes('No workload'))degraded++});set('wl-healthy',healthy);set('wl-degraded',degraded);
+ const podRows=$('podrows')?.querySelectorAll('tr')||[];set('pod-total-vis',podRows.length&&$('podrows').innerText.includes('No matching pods')?'0':podRows.length);let restarts=0,unhealthy=0,running=0,pending=0,failed=0;podRows.forEach(r=>{const t=r.innerText;if(!t||t.includes('No matching'))return;const cells=r.querySelectorAll('td');restarts+=parseInt(cells[4]?.textContent||0)||0;if(t.includes('Running'))running++;else if(t.includes('Pending'))pending++;else failed++;if(!t.includes('Running'))unhealthy++});set('pod-restart-vis',restarts);set('pod-unhealthy-vis',unhealthy);const podTotal=running+pending+failed;for(const [id,v] of [['pod-running-bar',running],['pod-pending-bar',pending],['pod-failed-bar',failed]])if($(id))$(id).style.width=(podTotal?v/podTotal*100:0)+'%';
+}
+const cpOriginalRefresh=refreshCurrentPage;
+refreshCurrentPage=async function(){await cpOriginalRefresh();updateVisualDashboards()};
+
+window.addEventListener('hashchange',()=>navigateTo(location.hash.slice(1)||'overview'));
+setInterval(()=>{if(!document.hidden)refreshCurrentPage()},30000);
 </script></body></html>
