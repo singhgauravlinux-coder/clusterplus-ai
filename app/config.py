@@ -11,6 +11,9 @@ class Settings(BaseSettings):
     ai_api_key: str = ""
     ai_model: str = "gpt-4.1-mini"
     ai_timeout_seconds: int = 45
+    rca_max_attempts: int = 6
+    rca_retry_base_seconds: int = 60
+    rca_retry_max_seconds: int = 1800
     ai_enabled: bool = True
     smtp_host: str = ""
     smtp_port: int = 587
