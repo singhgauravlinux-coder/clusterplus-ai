@@ -21,9 +21,41 @@ class Incident(Base):
     evidence: Mapped[dict] = mapped_column(JSON, default=dict)
     rca: Mapped[dict | None] = mapped_column(JSON, nullable=True)
     email_status: Mapped[str] = mapped_column(String(24), default="PENDING")
+    rca_status: Mapped[str] = mapped_column(String(24), default="PENDING")
+    rca_attempts: Mapped[int] = mapped_column(Integer, default=0)
+    rca_next_retry: Mapped[object | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    rca_last_error: Mapped[str | None] = mapped_column(Text, nullable=True)
     occurrences: Mapped[int] = mapped_column(Integer, default=1)
     created_at: Mapped[object] = mapped_column(DateTime(timezone=True), server_default=func.now())
     updated_at: Mapped[object] = mapped_column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
 
 def init_db():
     Base.metadata.create_all(engine)
+
+    column_definitions = {
+        "rca_status": "VARCHAR(24) NOT NULL DEFAULT 'PENDING'",
+        "rca_attempts": "INTEGER NOT NULL DEFAULT 0",
+        "rca_next_retry": "TIMESTAMP WITH TIME ZONE NULL",
+        "rca_last_error": "TEXT NULL",
+    }
+
+    with engine.begin() as conn:
+        existing_columns = {
+            column["name"]
+            for column in __import__("sqlalchemy").inspect(conn).get_columns("incidents")
+        }
+
+        for name, definition in column_definitions.items():
+            if name not in existing_columns:
+                conn.exec_driver_sql(
+                    f"ALTER TABLE incidents ADD COLUMN {name} {definition}"
+                )
+
+        conn.exec_driver_sql("""
+            UPDATE incidents
+            SET rca_status = CASE
+                WHEN rca IS NOT NULL THEN 'COMPLETED'
+                ELSE 'PENDING'
+            END
+            WHERE rca_status = 'PENDING'
+        """)
