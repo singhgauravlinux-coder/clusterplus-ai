@@ -8,7 +8,7 @@ prometheus:
   enabled: true
   prometheusSpec:
     retention: 15d
-    retentionSize: 20GB
+    retentionSize: 5GB
     scrapeInterval: 30s
     evaluationInterval: 30s
     storageSpec:
@@ -16,10 +16,10 @@ prometheus:
         spec:
           accessModes: ["ReadWriteOnce"]
           # Set this to a StorageClass available in your on-prem cluster.
-          storageClassName: CHANGE_ME_STORAGE_CLASS
+          storageClassName: local-path
           resources:
             requests:
-              storage: 50Gi
+              storage: 8Gi
 kubeStateMetrics:
   enabled: true
 prometheus-node-exporter:
