@@ -71,11 +71,12 @@ def workloads(namespace: str | None = None):
         for x in items:
             ns=x.metadata.namespace
             if ns in settings.excluded_namespaces: continue
-            desired=x.spec.replicas or 0
-            ready=getattr(x.status,"ready_replicas",None) or 0
-            if kind=="DaemonSet":
-                desired=x.status.desired_number_scheduled or 0
-                ready=x.status.number_ready or 0
+            if kind == "DaemonSet":
+                desired = x.status.desired_number_scheduled or 0
+                ready = x.status.number_ready or 0
+            else:
+                desired = x.spec.replicas or 0
+                ready = x.status.ready_replicas or 0
             out.append({"namespace":ns,"name":x.metadata.name,"kind":kind,"desired":desired,"ready":ready})
     return out
 
