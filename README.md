@@ -203,7 +203,7 @@ Do not use `--from-literal` with a password. Do not commit the generated hash
 or secret YAML to Git. Rotate credentials by recreating the Secret and reviewing
 your secret-management process.
 
-## 3. Install Prometheus (If not installed installed)
+## 3. Install Prometheus (If not installed)
 
 Use the Prometheus Community Helm chart. In an offline/restricted on-prem
 environment, mirror all required images to your internal registry and configure
@@ -290,7 +290,7 @@ kubectl logs -n observability deployment/k8s-ai-rca-agent --tail=100
 From a workstation that trusts the TLS issuer:
 
 ```bash
-curl -I https://clusterpulse.example.internal/
+curl -I https://clusterpulse.local/
 ```
 
 Expected behavior:
