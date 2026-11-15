@@ -259,6 +259,61 @@ body{background:radial-gradient(ellipse at 12% 8%,rgba(15,104,130,.22),transpare
 .topology-summary-button{width:100%;text-align:left;cursor:pointer;color:inherit;font:inherit}.topology-summary-button:hover{border-color:#4bd4e4;transform:translateY(-1px)}.topology-ns-card{position:relative;transition:border-color .18s,transform .18s}.topology-ns-card:hover{border-color:rgba(71,211,235,.65);transform:translateY(-1px)}
 .topology-ns-head{display:flex;align-items:center;justify-content:space-between;gap:10px}.topology-expand{border:1px solid var(--glass-line);background:rgba(72,130,190,.18);color:#cce8ff;border-radius:8px;padding:6px 10px;cursor:pointer}.topology-counts button{font:inherit;font-size:10px;padding:7px 9px;border-radius:8px;border:1px solid rgba(105,170,220,.18);background:rgba(80,120,170,.15);color:#bfd1e5;cursor:pointer}.topology-counts button:hover,.topology-counts button.active{background:rgba(42,175,205,.25);border-color:#4bd4e4;color:#e9fcff;box-shadow:0 0 14px rgba(57,204,224,.12)}
 .topology-resource-list{display:none;margin-top:13px;padding-top:12px;border-top:1px solid var(--glass-line)}.topology-ns-card.expanded .topology-resource-list{display:block}.topology-resource-list h4{font-size:11px;color:#75dfea;margin:0 0 9px}.topology-resource-list .topology-resource-item{display:flex;justify-content:space-between;gap:12px;padding:8px 9px;margin:5px 0;border:1px solid rgba(110,170,210,.12);border-radius:8px;background:rgba(4,16,29,.35);font-size:10px;color:#c4d7e9;cursor:pointer;text-align:left;width:100%}.topology-resource-item:hover{border-color:#4bd4e4;background:rgba(25,95,120,.28)}.topology-resource-item small{color:#8da8c1}.topology-empty{font-size:10px;color:#8da8c1;padding:7px}.topology-graph{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;align-items:center;padding:15px;margin:14px 0;border:1px solid var(--glass-line);border-radius:13px;background:rgba(7,22,38,.45)}.topology-graph-node{padding:11px;border:1px solid rgba(79,190,220,.35);border-radius:9px;background:rgba(21,66,91,.45);font-size:10px;color:#d3edff;text-align:center;overflow-wrap:anywhere}.topology-graph-node small{display:block;color:#8da8c1;margin-top:5px}.topology-graph-arrow{text-align:center;color:#60dbe7;font-size:18px}.topology-graph-empty{grid-column:1/-1;color:#91a8bf;font-size:11px}
+
+/* Interactive topology graph: stable hit targets and connected resource map */
+#page-topology .topology-ns-card,
+#page-topology .topology-summary-button,
+#page-topology .topology-counts button,
+#page-topology .topology-expand,
+#page-topology .topology-node,
+#page-topology .topology-resource-item {
+  position:relative; z-index:2; pointer-events:auto; transform:none!important;
+}
+#page-topology .topology-ns-card:hover { transform:none!important; border-color:rgba(56,232,255,.55); }
+#page-topology .topology-summary-button:hover { transform:none!important; }
+#page-topology .topology-counts button:hover,
+#page-topology .topology-expand:hover,
+#page-topology .topology-node:hover,
+#page-topology .topology-resource-item:hover { transform:none!important; filter:brightness(1.18); }
+#page-topology .topology-map {
+  position:relative; overflow:auto; padding:18px; margin:14px 0 20px;
+  border:1px solid rgba(56,232,255,.22); border-radius:16px;
+  background:linear-gradient(145deg,rgba(7,22,39,.94),rgba(9,15,32,.92));
+  min-height:180px; isolation:isolate;
+}
+#page-topology .topology-map-grid {
+  display:grid; grid-template-columns:minmax(190px,1fr) 90px minmax(190px,1fr);
+  align-items:center; gap:12px; min-width:540px;
+}
+#page-topology .topology-node-column {display:grid; gap:10px}
+#page-topology .topology-node {
+  display:flex; flex-direction:column; align-items:flex-start; gap:5px;
+  width:100%; min-height:64px; text-align:left; padding:12px 14px;
+  border:1px solid rgba(75,190,220,.42); border-radius:11px;
+  color:#e2f5ff; background:linear-gradient(145deg,rgba(19,65,91,.88),rgba(13,29,51,.94));
+  cursor:pointer; overflow-wrap:anywhere; box-shadow:0 7px 20px rgba(0,0,0,.2);
+}
+#page-topology .topology-node .node-kind {font-size:9px;letter-spacing:1px;color:#6fe2ee;font-weight:800;text-transform:uppercase}
+#page-topology .topology-node .node-name {font-size:12px;font-weight:750}
+#page-topology .topology-node .node-meta {font-size:10px;color:#9ab3ca}
+#page-topology .topology-node.node-service {border-left:3px solid #51d6a2}
+#page-topology .topology-node.node-pod {border-left:3px solid #63b7ff}
+#page-topology .topology-node.node-ingress {border-left:3px solid #b18aff}
+#page-topology .topology-node.node-pvc {border-left:3px solid #ffc36a}
+#page-topology .topology-connector {display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;color:#57dce9;text-align:center}
+#page-topology .topology-connector .line {width:100%;height:2px;background:linear-gradient(90deg,#4b9cff,#51e0e0);position:relative;box-shadow:0 0 10px #38e8ff66}
+#page-topology .topology-connector .line:after {content:"";position:absolute;right:-1px;top:-4px;border-left:8px solid #62e7f0;border-top:5px solid transparent;border-bottom:5px solid transparent}
+#page-topology .topology-connector small {font-size:9px;color:#91a9c2;line-height:1.2}
+#page-topology .topology-map-empty {padding:25px;text-align:center;color:#91a9c2;font-size:12px}
+#page-topology .topology-map-title {display:flex;justify-content:space-between;gap:12px;align-items:center;margin:8px 0;color:#9ab4cb;font-size:11px}
+#page-topology .topology-ns-card {z-index:1}
+#page-topology .topology-ns-card.expanded {z-index:3}
+#page-topology .topology-resource-list {position:relative;z-index:1}
+#page-topology .topology-resource-group {margin:12px 0}
+#page-topology .topology-resource-item {position:relative;z-index:2}
+#page-topology .topology-detail-anchor {scroll-margin-top:22px}
+@media(max-width:700px){#page-topology .topology-map{padding:10px}#page-topology .topology-map-grid{min-width:500px}}
+
 .timeline-list{display:grid;gap:9px}.timeline-event{display:grid;grid-template-columns:155px 72px minmax(120px,1fr);gap:12px;padding:13px 15px;border:1px solid var(--glass-line);border-radius:12px;background:rgba(14,34,54,.68)}.timeline-event p{grid-column:3;margin:0;color:#9fb3c9;font-size:11px;overflow-wrap:anywhere}.timeline-event time{font-size:10px;color:#8fa6bf}.notice{padding:14px 16px;margin:14px 0;border:1px solid var(--glass-line);border-radius:12px;background:rgba(22,49,73,.55);color:#a9bfd4;font-size:12px;line-height:1.6}.cost-card{padding:22px;margin:16px 0}.cost-card .metric{font-size:30px;margin:14px 0}.status-pass{color:#63dfb3}.status-warn{color:#ffc36a}.status-fail{color:#ff7888}.page-view select{max-width:240px;margin-right:8px}@media(max-width:760px){.timeline-event{grid-template-columns:1fr;gap:5px}.timeline-event p{grid-column:1}.management-grid{grid-template-columns:1fr}}
 
 </style>
@@ -754,10 +809,15 @@ td.status-fail:before{animation:neoPulse 1.8s infinite}
  <div class="card tablewrap"><table><thead><tr><th>SEVERITY</th><th>RESOURCE</th><th>SUMMARY</th><th>RCA STATUS</th><th>CONFIDENCE</th><th>EMAIL</th><th>DETAILS</th></tr></thead><tbody id="rca-rows"><tr><td colspan="7" class="empty">Loading investigations…</td></tr></tbody></table></div>
 </section>
 <section class="page-view" id="page-topology" data-page="topology" hidden>
- <div class="page-heading"><div><div class="eyebrow">CLUSTER MAP</div><h2>Topology</h2><p>Namespace resource groups and Service-to-Pod selector relationships. Read-only inventory.</p></div><span class="page-chip">AUTO REFRESH</span></div>
- <div class="section"><h2>Resource topology</h2><select id="topology-ns" onchange="loadTopology()"><option value="">All namespaces</option></select><button class="smallbtn" onclick="expandAllTopology(true)">Expand all</button><button class="smallbtn" onclick="expandAllTopology(false)">Collapse all</button></div>
- <div class="grid" id="topology-summary"></div><div class="topology-grid" id="topology-groups"></div>
- <div class="section"><h2 id="topology-detail-title">Resource details</h2><span id="topology-detail-hint">Select a resource category on any namespace card.</span></div><div class="card tablewrap"><table><thead><tr><th>NAMESPACE</th><th>KIND</th><th>RESOURCE</th><th>STATUS</th><th>DETAILS</th></tr></thead><tbody id="topology-resource-rows"><tr><td colspan="5" class="empty">Choose Pods, Services, Deployments, Ingresses or PVCs to inspect resources.</td></tr></tbody></table></div>
+ <div class="page-heading"><div><div class="eyebrow">CLUSTER MAP</div><h2>Topology</h2><p>Connected Kubernetes resources and their relationships. Select any node to inspect its inventory. Read-only.</p></div><span class="page-chip">AUTO REFRESH</span></div>
+ <div class="section"><h2>Resource topology</h2><select id="topology-ns" onchange="loadTopology()"><option value="">All namespaces</option></select><button class="smallbtn" type="button" onclick="expandAllTopology(true)">Expand all</button><button class="smallbtn" type="button" onclick="expandAllTopology(false)">Collapse all</button></div>
+ <div class="grid" id="topology-summary"></div>
+ <div class="section"><h2>Connected resource map</h2><span id="topology-map-hint">Select a resource node to inspect it</span></div>
+ <div id="topology-graph-canvas" class="topology-map"><div class="topology-map-empty">Loading Kubernetes resource relationships…</div></div>
+ <div class="section"><h2>Namespaces and resource inventory</h2><span>Expand a namespace or select a resource category</span></div>
+ <div class="topology-grid" id="topology-groups"></div>
+ <div class="section topology-detail-anchor"><h2 id="topology-detail-title">Resource details</h2><span id="topology-detail-hint">Select a node or resource category to inspect resources.</span></div>
+ <div class="card tablewrap"><table><thead><tr><th>NAMESPACE</th><th>KIND</th><th>RESOURCE</th><th>STATUS</th><th>DETAILS</th></tr></thead><tbody id="topology-resource-rows"><tr><td colspan="5" class="empty">Choose a resource node to inspect it.</td></tr></tbody></table></div>
  <div class="section"><h2>Resource relationships</h2><span>Service selectors, Ingress routes and PVC mounts</span></div><div class="card tablewrap"><table><thead><tr><th>NAMESPACE</th><th>SOURCE</th><th>RELATION</th><th>TARGET</th></tr></thead><tbody id="topology-edges"></tbody></table></div>
 </section>
 <section class="page-view" id="page-applications" data-page="applications" hidden>
@@ -1100,42 +1160,111 @@ function setTheme(mode){$('themeMode').value=mode;try{localStorage.setItem('clus
 const nsSelectors=['topology-ns','apps-ns','timeline-ns'];
 async function populateNamespaces(){try{const rows=await api('/api/namespaces');nsSelectors.forEach(id=>{const el=$(id);if(!el)return;const val=el.value;el.innerHTML='<option value="">All namespaces</option>'+rows.map(x=>`<option value="${esc(x.name)}">${esc(x.name)}</option>`).join('');el.value=val})}catch(e){console.warn('Namespace list unavailable',e)}}
 let topologySnapshot=null;
+let topologyInteractionsReady=false;
+const topologyKinds={pods:'Pod',services:'Service',deployments:'Deployment',ingresses:'Ingress',pvcs:'PVC'};
 function topologyCardResources(namespace,kind){
  if(!topologySnapshot)return [];
- return (topologySnapshot.resources?.[namespace]||[]).filter(x=>x.kind.toLowerCase()===(kind||'').toLowerCase());
+ return (topologySnapshot.resources?.[namespace]||[]).filter(x=>(x.kind||'').toLowerCase()===(kind||'').toLowerCase());
+}
+function topologyRowsHtml(rows){
+ return rows.map(x=>`<tr><td>${esc(x.namespace||'')}</td><td>${esc(x.kind||'')}</td><td><b>${esc(x.name||'')}</b></td><td>${esc(x.status||'Unknown')}</td><td>${esc(x.details||'—')}</td></tr>`).join('')||'<tr><td colspan="5" class="empty">No matching resources found.</td></tr>';
+}
+function showTopologyDetails(title,hint,rows){
+ $('topology-detail-title').textContent=title;
+ $('topology-detail-hint').textContent=hint;
+ $('topology-resource-rows').innerHTML=topologyRowsHtml(rows);
+ const anchor=document.querySelector('#page-topology .topology-detail-anchor');
+ anchor?.scrollIntoView({behavior:'smooth',block:'nearest'});
 }
 function renderTopologyResources(namespace,kind){
- const rows=topologyCardResources(namespace,kind);
- $('topology-detail-title').textContent=(kind||'Resources')+' · '+namespace;
- $('topology-detail-hint').textContent=rows.length+' matching resources · read-only inventory';
- $('topology-resource-rows').innerHTML=rows.map(x=>`<tr><td>${esc(namespace)}</td><td>${esc(x.kind)}</td><td><b>${esc(x.name)}</b></td><td>${esc(x.status||'Unknown')}</td><td>${esc(x.details||'—')}</td></tr>`).join('')||'<tr><td colspan="5" class="empty">No resources in this category for this namespace.</td></tr>';
+ const rows=topologyCardResources(namespace,kind).map(x=>({namespace,...x}));
+ showTopologyDetails((kind||'Resources')+' · '+namespace,rows.length+' matching resources · read-only inventory',rows);
 }
 function renderTopologyAllResources(key){
- const map={pods:'Pod',services:'Service',deployments:'Deployment',ingresses:'Ingress',pvcs:'PVC'};
- const kind=map[key];const rows=[];
- Object.entries(topologySnapshot?.resources||{}).forEach(([ns,items])=>(items||[]).filter(x=>!kind||x.kind===kind).forEach(x=>rows.push({namespace:ns,...x})));
- $('topology-detail-title').textContent=(kind||'All resources')+' · All namespaces';
- $('topology-detail-hint').textContent=rows.length+' matching resources · read-only inventory';
- $('topology-resource-rows').innerHTML=rows.map(x=>`<tr><td>${esc(x.namespace)}</td><td>${esc(x.kind)}</td><td><b>${esc(x.name)}</b></td><td>${esc(x.status||'Unknown')}</td><td>${esc(x.details||'—')}</td></tr>`).join('')||'<tr><td colspan="5" class="empty">No matching resources found.</td></tr>';
+ const kind=topologyKinds[key];const rows=[];
+ Object.entries(topologySnapshot?.resources||{}).forEach(([namespace,items])=>(items||[]).filter(x=>!kind||x.kind===kind).forEach(x=>rows.push({namespace,...x})));
+ showTopologyDetails((kind||'All resources')+' · All namespaces',rows.length+' matching resources · read-only inventory',rows);
 }
 function toggleTopologyCard(namespace,force){
  const card=[...document.querySelectorAll('.topology-ns-card')].find(x=>x.dataset.namespace===namespace);
  if(!card)return;
  const open=force===undefined?!card.classList.contains('expanded'):!!force;
  card.classList.toggle('expanded',open);
- const btn=card.querySelector('.topology-expand');if(btn){btn.textContent=open?'Collapse':'Expand';btn.setAttribute('aria-expanded',String(open));}
+ const btn=card.querySelector('.topology-expand');
+ if(btn){btn.textContent=open?'Collapse':'Expand';btn.setAttribute('aria-expanded',String(open));}
 }
 function expandAllTopology(open){document.querySelectorAll('.topology-ns-card').forEach(card=>toggleTopologyCard(card.dataset.namespace,open));}
-function renderTopologyGraph(namespace){
- const edges=(topologySnapshot?.edges||[]).filter(e=>e.namespace===namespace);
- if(!edges.length)return '<div class="topology-graph"><div class="topology-graph-empty">No selector, ingress or PVC relationships discovered in this namespace. Resource inventory is still available above.</div></div>';
- return '<div class="topology-graph">'+edges.slice(0,30).map(e=>`<div class="topology-graph-node">${esc(e.from)}<small>${esc(e.namespace)}</small></div><div class="topology-graph-arrow">→<small>${esc(e.type)}</small></div><div class="topology-graph-node">${esc(e.to)}<small>relationship target</small></div>`).join('')+'</div>';
+function renderTopologyGraph(namespaceFilter){
+ const resources=topologySnapshot?.resources||{};
+ const all=[];
+ Object.entries(resources).forEach(([namespace,items])=>{
+  if(namespaceFilter&&namespace!==namespaceFilter)return;
+  (items||[]).forEach(item=>all.push({namespace,...item}));
+ });
+ const edges=(topologySnapshot?.edges||[]).filter(e=>!namespaceFilter||e.namespace===namespaceFilter);
+ const findNode=(namespace,name,preferred)=>{
+  let x=all.find(r=>r.namespace===namespace&&r.name===name&&(!preferred||r.kind===preferred));
+  if(!x)x=all.find(r=>r.name===name&&(!preferred||r.kind===preferred));
+  return x;
+ };
+ const edgeRows=edges.slice(0,80).map(e=>{
+  const from=findNode(e.namespace,e.from),to=findNode(e.namespace,e.to);
+  const fromKind=from?.kind||'Resource',toKind=to?.kind||'Resource';
+  const fromName=from?.name||e.from,toName=to?.name||e.to;
+  return `<div class="topology-map-grid">
+   <div class="topology-node-column"><button type="button" class="topology-node node-${fromKind.toLowerCase()}" data-topo-action="resource" data-namespace="${esc(e.namespace)}" data-kind="${esc(fromKind)}" data-name="${esc(fromName)}"><span class="node-kind">${esc(fromKind)} · ${esc(e.namespace)}</span><span class="node-name">${esc(fromName)}</span><span class="node-meta">${esc(from?.status||'Kubernetes resource')}</span></button></div>
+   <div class="topology-connector"><div class="line"></div><small>${esc(e.type||'RELATED')}</small></div>
+   <div class="topology-node-column"><button type="button" class="topology-node node-${toKind.toLowerCase()}" data-topo-action="resource" data-namespace="${esc(e.namespace)}" data-kind="${esc(toKind)}" data-name="${esc(toName)}"><span class="node-kind">${esc(toKind)} · ${esc(e.namespace)}</span><span class="node-name">${esc(toName)}</span><span class="node-meta">${esc(to?.status||'Kubernetes resource')}</span></button></div>
+  </div>`;
+ }).join('');
+ const linked=new Set();
+ edges.forEach(e=>{linked.add(`${e.namespace}|${e.from}`);linked.add(`${e.namespace}|${e.to}`)});
+ const unlinked=all.filter(x=>!linked.has(`${x.namespace}|${x.name}`));
+ const groups={};
+ unlinked.forEach(x=>(groups[x.namespace]??=[]).push(x));
+ const orphanHtml=Object.entries(groups).map(([namespace,items])=>`<div class="topology-map-title"><b>${esc(namespace)}</b><span>${items.length} unlinked resources</span></div><div class="topology-node-column">${items.map(x=>`<button type="button" class="topology-node node-${String(x.kind||'').toLowerCase()}" data-topo-action="resource" data-namespace="${esc(namespace)}" data-kind="${esc(x.kind)}" data-name="${esc(x.name)}"><span class="node-kind">${esc(x.kind)} · ${esc(namespace)}</span><span class="node-name">${esc(x.name)}</span><span class="node-meta">${esc(x.status||'Unknown')}</span></button>`).join('')}</div>`).join('');
+ $('topology-graph-canvas').innerHTML=(edgeRows||orphanHtml)?(edgeRows+orphanHtml):'<div class="topology-map-empty">No resources were returned for this namespace.</div>';
+ $('topology-map-hint').textContent=`${all.length} resources · ${edges.length} discovered relationships · select any node`;
+}
+function initTopologyInteractions(){
+ if(topologyInteractionsReady)return;
+ const root=$('page-topology');if(!root)return;
+ topologyInteractionsReady=true;
+ root.addEventListener('click',event=>{
+  const control=event.target.closest('[data-topo-action]');
+  if(control){
+   event.preventDefault();event.stopPropagation();
+   const action=control.dataset.topoAction,namespace=control.dataset.namespace,kind=control.dataset.kind;
+   if(action==='resource'){
+    const all=Object.entries(topologySnapshot?.resources||{}).flatMap(([ns,items])=>(items||[]).map(x=>({namespace:ns,...x})));
+    const found=all.filter(x=>x.namespace===namespace&&x.name===control.dataset.name&&x.kind===kind);
+    showTopologyDetails(`${kind} · ${namespace}`,`${found.length} matching resource · read-only inventory`,found);
+   }else if(action==='category'){
+    renderTopologyResources(namespace,control.dataset.topoCategory);
+    toggleTopologyCard(namespace,true);
+   }
+   return;
+  }
+  const expand=event.target.closest('[data-topo-expand]');
+  if(expand){event.preventDefault();event.stopPropagation();toggleTopologyCard(expand.dataset.namespace);return;}
+  const category=event.target.closest('[data-topo-category]');
+  if(category){event.preventDefault();event.stopPropagation();renderTopologyResources(category.dataset.namespace,category.dataset.topoCategory);toggleTopologyCard(category.dataset.namespace,true);return;}
+  const summary=event.target.closest('[data-topo-summary]');
+  if(summary){event.preventDefault();event.stopPropagation();renderTopologyAllResources(summary.dataset.topoSummary);return;}
+ });
 }
 async function loadTopology(){
- const d=await api('/api/topology'+($('topology-ns').value?'?namespace='+encodeURIComponent($('topology-ns').value):''));topologySnapshot=d;
- $('topology-summary').innerHTML=Object.entries(d.totals).map(([k,v])=>`<button type="button" class="card topology-summary-button" onclick="renderTopologyAllResources('${k}')" title="Show ${esc(k)} across namespaces"><div class="metric-head"><span>${esc(k.toUpperCase())}</span><span>↗</span></div><div class="metric cyan">${v}</div></button>`).join('');
- $('topology-groups').innerHTML=d.namespaces.map(n=>`<div class="topology-ns-card" data-namespace="${esc(n.namespace)}"><div class="topology-ns-head"><h3>⬡ ${esc(n.namespace)} <small>· ${n.resources} resources</small></h3><button class="topology-expand" aria-expanded="false" onclick="toggleTopologyCard('${esc(n.namespace)}')">Expand</button></div><div class="topology-counts">${[['Deployment','deployments'],['Service','services'],['Pod','pods'],['Ingress','ingresses'],['PVC','pvcs']].map(([kind,key])=>`<button type="button" onclick="renderTopologyResources('${esc(n.namespace)}','${kind}');toggleTopologyCard('${esc(n.namespace)}',true)" title="Show ${key} in ${esc(n.namespace)}">${n[key]} ${key}</button>`).join('')}</div><div class="topology-resource-list"><h4>RESOURCE RELATIONSHIP GRAPH</h4>${renderTopologyGraph(n.namespace)}<h4>RESOURCE INVENTORY</h4>${['Deployment','Service','Pod','Ingress','PVC'].map(kind=>{const items=topologyCardResources(n.namespace,kind);return `<div class="topology-resource-group"><h4>${kind}s (${items.length})</h4>${items.length?items.map(x=>`<button class="topology-resource-item" type="button" onclick="renderTopologyResources('${esc(n.namespace)}','${kind}')"><span>${esc(x.name)}</span><small>${esc(x.status||'Unknown')}</small></button>`).join(''):'<div class="topology-empty">None found</div>'}</div>`}).join('')}</div></div>`).join('')||'<div class="notice">No namespaces found.</div>';
- $('topology-edges').innerHTML=d.edges.map(e=>`<tr><td>${esc(e.namespace)}</td><td>${esc(e.from)}</td><td>${esc(e.type)}</td><td>${esc(e.to)}</td></tr>`).join('')||'<tr><td colspan="4" class="empty">No resource relationships found.</td></tr>';
+ initTopologyInteractions();
+ const selected=$('topology-ns').value;
+ const d=await api('/api/topology'+(selected?'?namespace='+encodeURIComponent(selected):''));
+ topologySnapshot=d;
+ $('topology-summary').innerHTML=Object.entries(d.totals||{}).map(([k,v])=>`<button type="button" class="card topology-summary-button" data-topo-summary="${esc(k)}" title="Show ${esc(k)} across namespaces"><div class="metric-head"><span>${esc(k.toUpperCase())}</span><span>↗</span></div><div class="metric cyan">${Number(v)||0}</div></button>`).join('');
+ $('topology-groups').innerHTML=(d.namespaces||[]).map(n=>`<div class="topology-ns-card" data-namespace="${esc(n.namespace)}">
+  <div class="topology-ns-head"><h3>⬡ ${esc(n.namespace)} <small>· ${n.resources} resources</small></h3><button type="button" class="topology-expand" data-topo-expand data-namespace="${esc(n.namespace)}" aria-expanded="false">Expand</button></div>
+  <div class="topology-counts">${[['Deployment','deployments'],['Service','services'],['Pod','pods'],['Ingress','ingresses'],['PVC','pvcs']].map(([kind,key])=>`<button type="button" data-topo-action="category" data-namespace="${esc(n.namespace)}" data-topo-category="${kind}" title="Show ${key} in ${esc(n.namespace)}">${Number(n[key])||0} ${key}</button>`).join('')}</div>
+  <div class="topology-resource-list"><h4>RESOURCE INVENTORY</h4>${['Deployment','Service','Pod','Ingress','PVC'].map(kind=>{const items=topologyCardResources(n.namespace,kind);return `<div class="topology-resource-group"><h4>${kind}s (${items.length})</h4>${items.length?items.map(x=>`<button type="button" class="topology-resource-item" data-topo-action="resource" data-namespace="${esc(n.namespace)}" data-kind="${kind}" data-name="${esc(x.name)}"><span>${esc(x.name)}</span><small>${esc(x.status||'Unknown')}</small></button>`).join(''):'<div class="topology-empty">None found</div>'}</div>`}).join('')}</div></div>`).join('')||'<div class="notice">No namespaces found.</div>';
+ renderTopologyGraph(selected);
+ $('topology-edges').innerHTML=(d.edges||[]).map(e=>`<tr><td>${esc(e.namespace)}</td><td>${esc(e.from)}</td><td>${esc(e.type)}</td><td>${esc(e.to)}</td></tr>`).join('')||'<tr><td colspan="4" class="empty">No resource relationships found.</td></tr>';
 }
 async function loadApplications(){const d=await api('/api/applications'+(ns?'?namespace='+encodeURIComponent(ns):''));$('apps-rows').innerHTML=d.map(a=>`<tr><td>${esc(a.namespace)}</td><td><b>${esc(a.name)}</b></td><td>${a.workloads.map(w=>esc(w.kind)+': '+esc(w.name)).join('<br>')}</td><td>${a.pods}</td><td>${a.ready}</td><td>${a.desired}</td><td>${badge(a.ready>=a.desired,'Healthy','Degraded')}</td></tr>`).join('')||'<tr><td colspan="7" class="empty">No labeled Deployment or StatefulSet applications found.</td></tr>'}
 async function loadTimeline(){const ns=$('timeline-ns').value,limit=$('timeline-limit').value;const d=await api('/api/timeline?limit='+limit+(ns?'&namespace='+encodeURIComponent(ns):''));$('timeline-list').innerHTML=d.map(e=>`<div class="timeline-event"><time>${e.time?new Date(e.time).toLocaleString():'Time unavailable'}</time><b class="${e.type==='Warning'?'status-fail':'status-pass'}">${esc(e.type)}</b><div><b>${esc(e.reason)}</b><div class="visual-note">${esc(e.namespace)} · ${esc(e.object)} · x${e.count}</div></div><p>${esc(e.message)}</p></div>`).join('')||'<div class="notice">No Kubernetes events returned.</div>'}
