@@ -107,13 +107,13 @@ def _five_whys_html(value):
 
 def _section(title, body, accent="#0e7490"):
     return f"""
-    <tr><td style="padding:0 28px 18px;">
-      <table role="presentation" width="100%" cellspacing="0" cellpadding="0"
+    <tr><td class="section-cell" style="padding:0 28px 18px;">
+      <table role="presentation" class="section-card" width="100%" cellspacing="0" cellpadding="0"
              style="border:1px solid #e2e8f0;border-radius:12px;background:#ffffff;">
-        <tr><td style="padding:16px 18px 8px;border-left:4px solid {accent};">
+        <tr><td class="section-heading" style="padding:16px 18px 8px;border-left:4px solid {accent};">
           <div style="font-size:11px;letter-spacing:1.2px;font-weight:800;color:#64748b;text-transform:uppercase;">{_safe(title)}</div>
         </td></tr>
-        <tr><td style="padding:4px 18px 18px;font-size:14px;line-height:1.6;color:#334155;">{body}</td></tr>
+        <tr><td class="section-body" style="padding:4px 18px 18px;font-size:14px;line-height:1.6;color:#334155;">{body}</td></tr>
       </table>
     </td></tr>"""
 
@@ -152,25 +152,50 @@ def _format_rca(incident, rca):
 <meta name="color-scheme" content="light">
 <title>ClusterPulse AI Incident RCA</title>
 <style>
+/* Fluid container and responsive email layouts. */
+.email-shell {{ width:100% !important; max-width:680px !important; }}
+@media only screen and (min-width:601px) and (max-width:900px) {{
+  .email-shell {{ width:100% !important; max-width:680px !important; }}
+  .email-pad {{ padding-left:22px !important; padding-right:22px !important; }}
+  .hero-title {{ font-size:26px !important; line-height:1.22 !important; }}
+}}
 @media only screen and (max-width:600px) {{
-  .email-shell {{ width:100% !important; }}
-  .email-pad {{ padding-left:16px !important;padding-right:16px !important; }}
-  .meta-cell {{ display:block !important;width:100% !important;padding:7px 0 !important; }}
-  .hero-title {{ font-size:23px !important; }}
+  body {{ width:100% !important; min-width:100% !important; }}
+  .email-shell {{ width:100% !important; max-width:100% !important; border-radius:0 !important; }}
+  .email-pad {{ padding-left:16px !important; padding-right:16px !important; }}
+  .email-header-pad {{ padding:18px 16px !important; }}
+  .email-header-brand, .email-header-alert {{ display:block !important; width:100% !important; text-align:left !important; }}
+  .email-header-alert {{ padding-top:12px !important; }}
+  .meta-cell {{ display:block !important; width:100% !important; box-sizing:border-box !important; padding:12px 14px !important; }}
+  .meta-table {{ table-layout:fixed !important; }}
+  .hero-title {{ font-size:23px !important; line-height:1.22 !important; }}
+  .hero-resource {{ font-size:13px !important; overflow-wrap:anywhere !important; word-break:break-word !important; }}
+  .section-cell {{ padding-left:16px !important; padding-right:16px !important; }}
+  .section-card {{ border-radius:9px !important; }}
+  .section-heading {{ padding-left:13px !important; padding-right:13px !important; }}
+  .section-body {{ padding-left:13px !important; padding-right:13px !important; }}
+  .email-footer-pad {{ padding-left:16px !important; padding-right:16px !important; }}
+}}
+@media only screen and (max-width:380px) {{
+  .email-pad {{ padding-left:12px !important; padding-right:12px !important; }}
+  .email-header-pad {{ padding:16px 12px !important; }}
+  .hero-title {{ font-size:21px !important; }}
+  .section-cell {{ padding-left:12px !important; padding-right:12px !important; }}
+  .meta-cell {{ padding-left:12px !important; padding-right:12px !important; }}
 }}
 </style>
 </head>
 <body style="margin:0;padding:0;background:#eef2f7;font-family:Arial,Helvetica,sans-serif;color:#0f172a;">
 <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background:#eef2f7;padding:24px 8px;">
 <tr><td align="center">
-<table role="presentation" class="email-shell" width="680" cellspacing="0" cellpadding="0" border="0"
-       style="width:680px;max-width:680px;background:#f8fafc;border-radius:18px;overflow:hidden;border:1px solid #dbe4ee;">
-  <tr><td style="padding:22px 28px;background:#071426;background-image:linear-gradient(120deg,#071426,#12304a);">
+<table role="presentation" class="email-shell" width="100%" cellspacing="0" cellpadding="0" border="0"
+       style="width:100%;max-width:680px;background:#f8fafc;border-radius:18px;overflow:hidden;border:1px solid #dbe4ee;">
+  <tr><td class="email-header-pad" style="padding:22px 28px;background:#071426;background-image:linear-gradient(120deg,#071426,#12304a);">
     <table role="presentation" width="100%" cellspacing="0" cellpadding="0">
-      <tr><td valign="middle">
+      <tr><td class="email-header-brand" valign="middle">
         <div style="font-size:11px;letter-spacing:2px;font-weight:800;color:#67e8f9;">CLUSTERPULSE AI</div>
         <div style="padding-top:5px;font-size:13px;color:#cbd5e1;">Kubernetes observability · intelligent incident response</div>
-      </td><td align="right" valign="middle">
+      </td><td class="email-header-alert" align="right" valign="middle">
         <span style="display:inline-block;padding:7px 11px;border:1px solid #31516c;border-radius:20px;color:#a5f3fc;font-size:11px;font-weight:700;">INCIDENT ALERT</span>
       </td></tr>
     </table>
@@ -181,7 +206,7 @@ def _format_rca(incident, rca):
       <tr><td>
         <div style="font-size:11px;letter-spacing:1.5px;font-weight:800;color:{palette['accent']};">KUBERNETES INCIDENT · {palette['label']}</div>
         <h1 class="hero-title" style="margin:8px 0 10px;font-size:28px;line-height:1.2;color:#0f172a;">Root cause analysis report</h1>
-        <div style="padding-top:8px;font-size:14px;line-height:1.6;font-weight:700;color:#0f172a !important;word-break:break-word;overflow-wrap:anywhere;-webkit-text-fill-color:#0f172a;">{namespace} / {pod}</div>
+        <div class="hero-resource" style="padding-top:8px;font-size:14px;line-height:1.6;font-weight:700;color:#0f172a !important;word-break:break-word;overflow-wrap:anywhere;-webkit-text-fill-color:#0f172a;">{namespace} / {pod}</div>
       </td></tr>
       <tr><td style="padding-top:16px;">
         <span style="display:inline-block;background:{palette['accent']};color:#ffffff;padding:7px 12px;border-radius:7px;font-size:11px;font-weight:800;letter-spacing:.6px;">{palette['label']} SEVERITY</span>
@@ -191,7 +216,7 @@ def _format_rca(incident, rca):
   </td></tr>
 
   <tr><td class="email-pad" style="padding:20px 28px 8px;">
-    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background:#ffffff;border:1px solid #dbe4ee;border-radius:12px;">
+    <table role="presentation" class="meta-table" width="100%" cellspacing="0" cellpadding="0" style="background:#ffffff;border:1px solid #dbe4ee;border-radius:12px;">
       <tr>
         <td class="meta-cell" width="50%" style="padding:15px 16px;border-bottom:1px solid #e2e8f0;">
           <div style="font-size:10px;font-weight:800;letter-spacing:1px;color:#64748b;">INCIDENT OPENED</div>
@@ -229,7 +254,7 @@ def _format_rca(incident, rca):
   {_section("Suggested kubectl commands", commands, "#475569")}
   {_section("Further investigation", further, "#475569")}
 
-  <tr><td class="email-pad" style="padding:2px 28px 24px;">
+  <tr><td class="email-pad email-footer-pad" style="padding:2px 28px 24px;">
     <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background:#eaf2f8;border-radius:10px;">
       <tr><td style="padding:14px 16px;font-size:12px;line-height:1.55;color:#475569;">
         <strong style="color:#0f172a;">Operator notice</strong><br>
