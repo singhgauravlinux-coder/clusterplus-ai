@@ -13,7 +13,7 @@ spec:
       labels:
         app: k8s-ai-rca-agent
       annotations:
-        clusterpulse.io/image-revision: "fe66933cd72519083d45f2f79b29756ac65817dc"
+        clusterpulse.io/image-revision: "e59b8c1f6c2ce708798cf6ab133ffc08021fe973"
     spec:
       serviceAccountName: k8s-ai-rca-agent
       containers:
